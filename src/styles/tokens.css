@@ -34,6 +34,15 @@
 	--color-accent: light-dark(#0066cc, #2997ff);
 	--color-notice-bg: light-dark(#fff4d6, #3a2f0f);
 	--color-notice-text: light-dark(#6b4e00, #ffd772);
+	--color-separator-strong: light-dark(
+		rgb(0 0 0 / 0.28),
+		rgb(255 255 255 / 0.32)
+	);
+	--color-accent-soft: light-dark(#e8f1fc, #0f2740);
+	--color-on-accent: light-dark(#ffffff, #00101f);
+	--color-error-bg: light-dark(#fdecea, #3b1513);
+	--color-error-text: light-dark(#8c1d18, #ffb4ab);
+	--color-success-text: light-dark(#1b6b3a, #7ddc9f);
 
 	/* 余白 */
 	--space-1: 0.25rem;

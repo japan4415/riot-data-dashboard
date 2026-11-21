@@ -1,9 +1,15 @@
+import { useState } from "react";
 import { ImportPage } from "../features/import/ImportPage.tsx";
+import { ImportReportPage } from "../features/report/ImportReportPage.tsx";
+import type { ImportResult } from "../import/importArchive.ts";
 import styles from "./App.module.css";
 
 const REPOSITORY_URL = "https://github.com/japan4415/riot-data-dashboard";
 
 export function App() {
+	// 読み込んだデータはメモリ上だけに置く。再読み込みすると消える
+	const [result, setResult] = useState<ImportResult | null>(null);
+
 	return (
 		<div className={styles.shell}>
 			<header className={styles.bar}>
@@ -13,7 +19,11 @@ export function App() {
 			</header>
 
 			<main className={styles.main}>
-				<ImportPage />
+				{result ? (
+					<ImportReportPage result={result} onDiscard={() => setResult(null)} />
+				) : (
+					<ImportPage onImported={setResult} />
+				)}
 			</main>
 
 			<footer className={styles.footer}>

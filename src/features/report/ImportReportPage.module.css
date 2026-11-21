@@ -1,0 +1,237 @@
+.intro {
+	display: grid;
+	gap: var(--space-5);
+	justify-items: start;
+}
+
+.heading {
+	font-size: var(--text-display-size);
+	font-weight: 700;
+	line-height: var(--text-display-leading);
+	letter-spacing: var(--text-display-tracking);
+}
+
+/* フォーカスは画面の切り替えを伝えるためだけに移すので、枠は出さない */
+.heading:focus {
+	outline: none;
+}
+
+.lead {
+	text-wrap: pretty;
+	word-break: auto-phrase;
+	max-width: 36em;
+	color: var(--color-text-secondary);
+	font-size: var(--text-title-size);
+	line-height: 1.7;
+}
+
+.summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+	gap: var(--space-4);
+	width: 100%;
+	margin: 0;
+}
+
+.summaryItem {
+	display: grid;
+	gap: var(--space-1);
+	padding: var(--space-4) var(--space-5);
+	border-radius: var(--radius-l);
+	background: var(--color-surface);
+}
+
+.summaryLabel {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.summaryValue {
+	margin: 0;
+	font-size: 1.75rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
+}
+
+.discardButton {
+	min-height: 2.75rem;
+	padding: var(--space-3) var(--space-5);
+	border: 1px solid var(--color-separator-strong);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-body-size);
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	transition:
+		transform 100ms ease-out,
+		background-color 100ms ease-out;
+}
+
+/* 押した瞬間に反応を返す */
+.discardButton:active {
+	transform: scale(0.97);
+	background: var(--color-separator);
+}
+
+.group {
+	margin-top: var(--space-7);
+}
+
+.groupHeading {
+	font-size: var(--text-title-size);
+	font-weight: 600;
+	line-height: var(--text-title-leading);
+	letter-spacing: var(--text-title-tracking);
+}
+
+.tableScroll {
+	margin-top: var(--space-3);
+	overflow-x: auto;
+	border-radius: var(--radius-l);
+	background: var(--color-surface);
+}
+
+/*
+ * 列の幅を固定して、ゲームごとに分かれた表の列位置をそろえる。
+ * 幅が狭い画面では表を縮めず、枠の中で横にスクロールさせる。
+ */
+.table {
+	width: 100%;
+	min-width: 34rem;
+	table-layout: fixed;
+	border-collapse: collapse;
+	font-size: var(--text-body-size);
+	line-height: 1.5;
+}
+
+.table th,
+.table td {
+	padding: var(--space-3) var(--space-4);
+	text-align: start;
+	vertical-align: baseline;
+}
+
+.table thead th:nth-child(2) {
+	width: 9rem;
+}
+
+.table thead th:nth-child(3) {
+	width: 6.5rem;
+}
+
+.table thead th:nth-child(4) {
+	width: 8.5rem;
+}
+
+.table thead th {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	font-weight: 600;
+	letter-spacing: var(--text-small-tracking);
+	white-space: nowrap;
+}
+
+.table tbody tr {
+	border-top: 1px solid var(--color-separator);
+}
+
+.table .numeric {
+	text-align: end;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.kind {
+	font-weight: 500;
+}
+
+.path {
+	font-family: var(--font-mono);
+	font-size: 0.875em;
+	font-weight: 400;
+	overflow-wrap: anywhere;
+}
+
+.fileCount {
+	margin-inline-start: var(--space-2);
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	font-weight: 400;
+	white-space: nowrap;
+}
+
+.statusBadge {
+	white-space: nowrap;
+}
+
+.statusBadge[data-status="loaded"] {
+	color: var(--color-success-text);
+}
+
+.statusBadge[data-status="empty"],
+.statusBadge[data-status="unsupported"] {
+	color: var(--color-text-secondary);
+}
+
+.statusBadge[data-status="failed"] {
+	color: var(--color-error-text);
+	font-weight: 600;
+}
+
+.legend {
+	margin-top: var(--space-7);
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.legendHeading {
+	font-size: inherit;
+	font-weight: 600;
+}
+
+.legendList {
+	display: grid;
+	gap: var(--space-1);
+	margin: var(--space-2) 0 0;
+}
+
+.legendList > div {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1) var(--space-3);
+}
+
+.legendList dt {
+	min-width: 6em;
+	font-weight: 600;
+}
+
+.legendList dd {
+	margin: 0;
+}
+
+@media (prefers-contrast: more) {
+	.summaryItem,
+	.tableScroll {
+		border: 1px solid var(--color-text);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.discardButton {
+		transition: none;
+	}
+
+	.discardButton:active {
+		transform: none;
+	}
+}
