@@ -35,8 +35,12 @@ pnpm run dev
 
 ## デプロイ
 
-main へのマージをきっかけに、Cloudflare Builds が `pnpm exec cf deploy` を実行します。
-設定は `cloudflare.config.ts` にあります。
+検査とデプロイは Cloudflare Builds で行います。GitHub Actions は使いません。
+
+- main 以外のブランチへ push すると、検査（`pnpm run check`）のあとにプレビューを作ります。
+- main へマージすると、検査のあとに `pnpm exec cf deploy` で公開します。
+
+Worker の設定は `cloudflare.config.ts` にあります。
 
 ## テスト用データについて
 
