@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"includes": ["**", "!docs", "!**/*.md"]
+		"includes": ["**", "!docs", "!**/*.md", "!renovate.json"]
 	},
 	"formatter": {
 		"enabled": true,
