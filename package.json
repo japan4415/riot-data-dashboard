@@ -1,0 +1,37 @@
+{
+	"name": "riot-data-dashboard",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@10.34.6",
+	"engines": {
+		"node": ">=22"
+	},
+	"scripts": {
+		"dev": "cf dev",
+		"build": "cf build",
+		"deploy": "cf deploy",
+		"typecheck": "tsc",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
+		"test": "vitest run",
+		"check": "pnpm run lint && pnpm run typecheck && pnpm run test"
+	},
+	"dependencies": {
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.6.8",
+		"@cloudflare/vite-plugin": "2.0.0-rc.3",
+		"@testing-library/dom": "^10.4.2",
+		"@testing-library/react": "^16.3.3",
+		"@types/react": "^19.3.0",
+		"@types/react-dom": "^19.3.0",
+		"@vitejs/plugin-react": "^6.3.0",
+		"cf": "1.0.0-rc.2",
+		"jsdom": "^31.0.1",
+		"typescript": "^7.0.2",
+		"vite": "^8.3.8",
+		"vitest": "^5.1.1"
+	}
+}

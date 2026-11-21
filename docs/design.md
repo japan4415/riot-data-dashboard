@@ -341,9 +341,13 @@ LoL のストア取引は、RP の購入、贈り物、返金なども 1 つの�
 - コンテンツセキュリティポリシーで通信先を禁止する（`connect-src 'none'`）。コードに不備があっても、ブラウザがデータの送信を止める。
 - 外部のフォント、画像、スクリプトを読み込まない。必要なものはすべて同梱する。
 
-ポリシーは静的アセットの `_headers` ファイルで配信する。
+ポリシーは 2 つの経路で指定する。定義は `build/security-headers.ts` の 1 か所に置く。
+
+- 静的アセットの `_headers` ファイル。ビルド時に生成する。
+- HTML の `meta` 要素。ビルド時に `index.html` へ差し込む。
+
 `cf` でデプロイした場合に `_headers` が有効になるかは未確認なので、段階 0 で確かめる。
-無効な場合は HTML の `meta` 要素で指定する。
+`meta` 要素にも同じポリシーを入れておくので、`_headers` が効かなくても通信の禁止は保たれる。
 
 開発時の自動再読み込みは通信を使うので、ポリシーは本番のビルドにだけ適用する。
 
@@ -355,8 +359,9 @@ LoL のストア取引は、RP の購入、贈り物、返金なども 1 つの�
 ├── vite.config.ts
 ├── index.html
 ├── package.json
-├── public/
-│   └── _headers             セキュリティ関連のヘッダー
+├── build/
+│   └── security-headers.ts  セキュリティ関連のヘッダーをビルド時に生成する
+├── public/                  そのまま配信するファイル
 ├── src/
 │   ├── main.tsx
 │   ├── app/                 画面の枠、メニュー、ルーティング、データの保持
@@ -405,19 +410,23 @@ flowchart LR
 
 ### 流れ
 
-1. プルリクエストで GitHub Actions が整形の検査、型検査、テスト、ビルドを実行する。
-2. main へマージすると、Cloudflare Builds がビルドとデプロイを実行する。
+1. main 以外のブランチへ push すると、Cloudflare Builds が検査とビルドを実行し、プレビューを作る。
+2. main へマージすると、Cloudflare Builds が検査、ビルド、デプロイを実行する。
+
+検査（整形、型、テスト）も Cloudflare Builds で行う。GitHub Actions は使わない。
 
 ### Cloudflare Builds の設定
 
-| 項目 | 値 |
-|---|---|
-| 対象のブランチ | `main` |
-| ビルドコマンド | `pnpm run check`（型検査とテスト） |
-| デプロイコマンド | `pnpm exec cf deploy` |
+| 項目 | 本番（`main`） | プレビュー（`main` 以外） |
+|---|---|---|
+| ビルドコマンド | `pnpm run check` | `pnpm run check` |
+| デプロイコマンド | `pnpm exec cf deploy` | `pnpm exec cf previews deploy` |
 
-- `cf deploy` はビルドしてからアップロードする。ビルドコマンドでは検査だけを行う。
-- リポジトリとの接続とトリガーの作成には、`cf builds` のコマンドを使う。
+- `cf deploy` と `cf previews deploy` は、ビルドしてからアップロードする。ビルドコマンドでは検査だけを行う。
+- 検査に失敗すると、デプロイは行われない。
+- 依存パッケージは Cloudflare Builds が自動で導入する。
+- Node.js の版は `.node-version`、pnpm の版は `package.json` の `packageManager` で決まる。
+- リポジトリとの接続とビルドの設定には、`cf builds workers create` を使う。
 - `wrangler` は使わない。
 
 ### Workers の設定
@@ -439,11 +448,14 @@ flowchart LR
 段階 0 で、実際にデプロイして確かめる。
 
 - `domains` の指定だけで独自ドメインが有効になるか、DNS や証明書の操作が別に要るか
-- Cloudflare Builds の実行環境で `cf` が動くか（`cf` は Node.js 22 以上を必要とする）
-- Cloudflare Builds が依存パッケージを自動で導入するか、ビルドコマンドに導入の手順が要るか
-- Cloudflare Builds が渡す認証情報で `cf deploy` が通るか
-- GitHub との初回の接続を `cf` だけで行えるか、ダッシュボードでの操作が要るか
+- Cloudflare Builds が渡す認証情報で `cf deploy` と `cf previews deploy` が通るか
 - `_headers` ファイルが有効になるか
+
+次の点は、Cloudflare の公式ドキュメントで確認した（2026-11-22）。
+
+- 実行環境の Node.js は既定で 24 系であり、`cf` が必要とする 22 以上を満たす。
+- 依存パッケージは自動で導入される。
+- プレビュー用のコマンドとして `cf previews deploy` を使える（`cf` 1.0.0-beta.18 以上）。
 
 ## 13. 進め方
 

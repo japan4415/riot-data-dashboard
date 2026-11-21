@@ -1,0 +1,3 @@
+# workerd は実行ファイルを配置するために導入時のスクリプトを必要とする
+onlyBuiltDependencies:
+  - workerd
