@@ -1,0 +1,91 @@
+.intro {
+	display: grid;
+	gap: var(--space-5);
+	justify-items: start;
+}
+
+.heading {
+	font-size: var(--text-display-size);
+	font-weight: 700;
+	line-height: var(--text-display-leading);
+	letter-spacing: var(--text-display-tracking);
+}
+
+.lead {
+	/* 短い文は文節で折り返し、単語の途中で切らない */
+	text-wrap: pretty;
+	word-break: auto-phrase;
+	max-width: 36em;
+	color: var(--color-text-secondary);
+	font-size: var(--text-title-size);
+	line-height: 1.7;
+}
+
+.notice {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-1) var(--space-3);
+	padding: var(--space-3) var(--space-4);
+	border-radius: var(--radius-m);
+	background: var(--color-notice-bg);
+	color: var(--color-notice-text);
+	font-size: var(--text-body-size);
+	line-height: 1.5;
+}
+
+.noticeLabel {
+	font-size: var(--text-small-size);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.handling {
+	margin-top: var(--space-8);
+}
+
+.sectionHeading {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	font-weight: 600;
+	line-height: var(--text-small-leading);
+	letter-spacing: 0.04em;
+}
+
+.cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+	gap: var(--space-4);
+	margin-top: var(--space-3);
+}
+
+.card {
+	display: grid;
+	align-content: start;
+	gap: var(--space-2);
+	padding: var(--space-5);
+	border-radius: var(--radius-l);
+	background: var(--color-surface);
+}
+
+.cardTitle {
+	font-size: var(--text-title-size);
+	font-weight: 600;
+	line-height: var(--text-title-leading);
+	letter-spacing: var(--text-title-tracking);
+}
+
+.cardBody {
+	text-wrap: pretty;
+	word-break: auto-phrase;
+	color: var(--color-text-secondary);
+	font-size: var(--text-body-size);
+	line-height: 1.7;
+}
+
+@media (prefers-contrast: more) {
+	.card,
+	.notice {
+		border: 1px solid var(--color-text);
+	}
+}

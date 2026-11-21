@@ -1,0 +1,57 @@
+/*
+ * 色、文字、余白などの共通の値。
+ * 余白と文字の大きさは rem で持ち、利用者の文字サイズ設定に追従させる。
+ */
+:root {
+	color-scheme: light dark;
+
+	/* 文字 */
+	--font-sans:
+		system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI",
+		sans-serif;
+	--font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+	/* 大きい文字ほど行間と字間を詰める */
+	--text-display-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem);
+	--text-display-leading: 1.25;
+	--text-display-tracking: -0.015em;
+	--text-title-size: 1.125rem;
+	--text-title-leading: 1.4;
+	--text-title-tracking: -0.005em;
+	--text-body-size: 1rem;
+	--text-body-leading: 1.75;
+	--text-body-tracking: 0;
+	--text-small-size: 0.8125rem;
+	--text-small-leading: 1.6;
+	--text-small-tracking: 0.01em;
+
+	/* 色 */
+	--color-bg: light-dark(#f5f5f7, #000000);
+	--color-surface: light-dark(#ffffff, #1c1c1e);
+	--color-text: light-dark(#1d1d1f, #f5f5f7);
+	--color-text-secondary: light-dark(#6e6e73, #a1a1a6);
+	--color-separator: light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.16));
+	--color-accent: light-dark(#0066cc, #2997ff);
+	--color-notice-bg: light-dark(#fff4d6, #3a2f0f);
+	--color-notice-text: light-dark(#6b4e00, #ffd772);
+
+	/* 余白 */
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.5rem;
+	--space-6: 2rem;
+	--space-7: 3rem;
+	--space-8: 4.5rem;
+
+	/* 形 */
+	--radius-s: 0.5rem;
+	--radius-m: 0.875rem;
+	--radius-l: 1.25rem;
+
+	/* 配置 */
+	--content-width: 60rem;
+	--page-gutter: clamp(1rem, 4vw, 2rem);
+	--bar-height: 3rem;
+}
