@@ -444,19 +444,26 @@ flowchart LR
 公開先は `cloudflare.config.ts` の `domains` に指定する。
 `discord.jp` のゾーンが、デプロイ先と同じ Cloudflare アカウントにあることを前提とする。
 
+### 確認した事項
+
+実際にデプロイして確かめた（2026-11-22）。
+
+- `domains` の指定だけで独自ドメインが有効になる。DNS や証明書の操作は要らなかった。
+- `_headers` ファイルは有効で、応答にセキュリティ関連のヘッダーが付く。`_headers` 自体は配信されない。
+- Cloudflare Builds が渡す認証情報で、`cf deploy` と `cf previews deploy` が通る。
+- Cloudflare Builds の実行環境は、`.node-version` と `packageManager` に従って Node.js 24 系と pnpm を用意し、依存パッケージを自動で導入する。
+- 検査に失敗したビルドでは、デプロイが行われない。
+
+### 設定の記録
+
+- 最初のデプロイは、手元から `pnpm exec cf deploy` で行った。Worker が無いと、ビルドの設定を作れないためである。
+- リポジトリとの接続とビルドの設定は、`cf builds workers create` で行った。
+- ビルド用のトークンは、アカウントに既にあった Workers Builds 用のものを使った。新しいトークンは作っていない。
+- main 以外のブランチのビルド結果は、`cf builds list` には出ない。プルリクエストのチェックに付くビルド ID を `cf builds get` と `cf builds logs` に渡して確認する。
+
 ### 未確認の事項
 
-段階 0 で、実際にデプロイして確かめる。
-
-- `domains` の指定だけで独自ドメインが有効になるか、DNS や証明書の操作が別に要るか
-- Cloudflare Builds が渡す認証情報で `cf deploy` と `cf previews deploy` が通るか
-- `_headers` ファイルが有効になるか
-
-次の点は、Cloudflare の公式ドキュメントで確認した（2026-11-22）。
-
-- 実行環境の Node.js は既定で 24 系であり、`cf` が必要とする 22 以上を満たす。
-- 依存パッケージは自動で導入される。
-- プレビュー用のコマンドとして `cf previews deploy` を使える（`cf` 1.0.0-beta.18 以上）。
+- プレビューには URL が付いていない。Worker で `workers.dev` を有効にしていないためと考えられるが、確かめていない。
 
 ## 13. 進め方
 
