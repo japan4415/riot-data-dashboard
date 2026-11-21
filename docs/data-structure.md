@@ -224,7 +224,7 @@ Riot Games にデータ開示を請求すると届く zip ファイルの構造�
 | `transaction_id` | str | 取引 ID。`<プラットフォーム接頭辞>-<UUID>`。`store_transactions_uc.json` の `id` と対応する |
 | `transaction_number` | str | 決済側の取引番号。書式は決済手段によって違う |
 | `created` | str | 日時。書式 A または B |
-| `amount` | str | 支払額。**文字列**で、小数点以下の桁数がそろっていない（`35.0` と `35.00` など） |
+| `amount` | str | 支払額。**文字列**で、小数点以下の桁数がそろっていない（`12.0` と `12.00` のような違い） |
 | `currency_type` | str | 通貨コード。観測した値: `USD`、`JPY` |
 | `payment_type` | str | 決済手段。観測した値: `Chase`、`PayonCreditCard`、`softbank-creditcard`、`SB_CreditCard`、`SB_PrepaidCard`、`paypal`。同じ決済手段と思われるものが別の表記で現れる（`softbank-creditcard` と `SB_CreditCard`） |
 | `store_account_id` | int | ストアのアカウント ID。1 つのアカウントでも複数の値が現れる |
