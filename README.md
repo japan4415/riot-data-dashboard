@@ -48,8 +48,14 @@ Worker の設定は `cloudflare.config.ts` にあります。
 テストには、手で合成したデータ（`tests/fixtures/syntheticExport.ts`）だけを使います。
 
 手元の zip を読み込めるかは、次のコマンドで確かめられます。
-表示するのはファイルの種類ごとの件数だけで、個人の値は表示しません。
+表示するのは件数と合計だけで、個人の値は表示しません。
 
 ```sh
 node scripts/import-report.ts <zip のパス>
+```
+
+画面の見た目は、数年分の合成データで確かめられます。次のコマンドで zip を作り、画面から読み込みます。
+
+```sh
+node scripts/make-demo-zip.ts <出力先のパス>
 ```

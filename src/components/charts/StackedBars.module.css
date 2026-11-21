@@ -1,0 +1,46 @@
+.container {
+	position: relative;
+	min-width: 0;
+}
+
+.svg {
+	display: block;
+	overflow: visible;
+}
+
+/* 目盛りの線は、地の色から 1 段だけ離した細い実線にして、データより目立たせない */
+.grid {
+	stroke: var(--chart-grid);
+	stroke-width: 1px;
+}
+
+.baseline {
+	stroke: var(--chart-axis);
+	stroke-width: 1px;
+}
+
+.tick {
+	fill: var(--color-text-secondary);
+	font-size: 0.6875rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.segment {
+	pointer-events: none;
+}
+
+.hit {
+	fill: transparent;
+	outline: none;
+}
+
+/* 指している区切りを、薄い帯で示す */
+.hit:hover,
+.hit:focus-visible {
+	fill: var(--chart-hover);
+}
+
+.hit:focus-visible {
+	stroke: var(--color-accent);
+	stroke-width: 2px;
+}

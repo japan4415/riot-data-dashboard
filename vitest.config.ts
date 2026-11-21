@@ -7,6 +7,8 @@ export default defineConfig({
 	plugins: [react()],
 	test: {
 		environment: "node",
+		// 画面のテストは利用者の時刻で日付を区切るので、実行する場所によらず同じ結果になるよう固定する
+		env: { TZ: "Asia/Tokyo" },
 		include: [
 			"src/**/*.test.{ts,tsx}",
 			"build/**/*.test.ts",
