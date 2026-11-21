@@ -21,23 +21,98 @@
 	line-height: 1.7;
 }
 
-.notice {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: baseline;
-	gap: var(--space-1) var(--space-3);
-	padding: var(--space-3) var(--space-4);
-	border-radius: var(--radius-m);
-	background: var(--color-notice-bg);
-	color: var(--color-notice-text);
-	font-size: var(--text-body-size);
-	line-height: 1.5;
+/*
+ * ファイルを受け取る枠。ドラッグ中は、落とせることを枠の色ですぐに示す。
+ */
+.dropZone {
+	display: grid;
+	gap: var(--space-3);
+	justify-items: center;
+	width: 100%;
+	padding: var(--space-7) var(--space-5);
+	border: 1.5px dashed var(--color-separator-strong);
+	border-radius: var(--radius-l);
+	background: var(--color-surface);
+	text-align: center;
+	transition:
+		border-color 120ms ease-out,
+		background-color 120ms ease-out;
 }
 
-.noticeLabel {
+.dropZone[data-dragging] {
+	border-color: var(--color-accent);
+	border-style: solid;
+	background: var(--color-accent-soft);
+}
+
+.fileInput {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.chooseButton {
+	min-height: 2.75rem;
+	padding: var(--space-3) var(--space-5);
+	border: 0;
+	border-radius: 999px;
+	background: var(--color-accent);
+	color: var(--color-on-accent);
+	font: inherit;
+	font-size: var(--text-body-size);
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	transition:
+		transform 100ms ease-out,
+		opacity 100ms ease-out;
+}
+
+/* 押した瞬間に反応を返す */
+.chooseButton:active:not(:disabled) {
+	transform: scale(0.97);
+	opacity: 0.85;
+}
+
+.chooseButton:disabled {
+	opacity: 0.6;
+	cursor: progress;
+}
+
+.dropHint {
+	color: var(--color-text-secondary);
 	font-size: var(--text-small-size);
-	font-weight: 700;
-	letter-spacing: 0.04em;
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.dropZone[data-reading] .dropHint {
+	visibility: hidden;
+}
+
+/* 読み上げ用。画面上の状態はボタンの文言で示す */
+.status {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.error {
+	text-wrap: pretty;
+	word-break: auto-phrase;
+	max-width: 32em;
+	padding: var(--space-3) var(--space-4);
+	border-radius: var(--radius-m);
+	background: var(--color-error-bg);
+	color: var(--color-error-text);
+	font-size: var(--text-body-size);
+	line-height: 1.6;
 }
 
 .handling {
@@ -85,7 +160,22 @@
 
 @media (prefers-contrast: more) {
 	.card,
-	.notice {
+	.error {
 		border: 1px solid var(--color-text);
+	}
+
+	.dropZone {
+		border-color: var(--color-text);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dropZone,
+	.chooseButton {
+		transition: none;
+	}
+
+	.chooseButton:active:not(:disabled) {
+		transform: none;
 	}
 }

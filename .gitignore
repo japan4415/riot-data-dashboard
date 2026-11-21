@@ -9,3 +9,6 @@ coverage/
 !.env.example
 *.log
 .DS_Store
+
+# エージェントの作業用コピー
+.claude/worktrees/
