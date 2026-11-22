@@ -63,13 +63,14 @@
 	background: transparent;
 	color: var(--color-text-secondary);
 	font: inherit;
-	font-size: var(--text-small-size);
-	font-weight: var(--weight-heading);
+	font-size: var(--text-button-size);
+	font-weight: var(--weight-label);
 	line-height: 1;
 	cursor: pointer;
 	transition:
-		background-color 100ms ease-out,
-		color 100ms ease-out;
+		background-color var(--ease-hover),
+		color var(--ease-hover);
+	letter-spacing: var(--tracking);
 }
 
 .toggleButton[aria-pressed="true"] {

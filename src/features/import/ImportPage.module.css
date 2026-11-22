@@ -6,7 +6,7 @@
 
 .heading {
 	font-size: var(--text-display-size);
-	font-weight: 900;
+	font-weight: var(--weight-heading);
 	line-height: var(--text-display-leading);
 	letter-spacing: var(--text-display-tracking);
 }
@@ -15,10 +15,12 @@
 	/* 短い文は文節で折り返し、単語の途中で切らない */
 	text-wrap: pretty;
 	word-break: auto-phrase;
-	max-width: 36em;
+	max-width: 34em;
 	color: var(--color-text-secondary);
-	font-size: var(--text-title-size);
-	line-height: 1.7;
+	font-size: var(--text-lead-size);
+	font-weight: var(--weight-medium);
+	line-height: 1.5;
+	letter-spacing: var(--tracking);
 }
 
 /*
@@ -57,19 +59,20 @@
 }
 
 .sampleButton {
-	min-height: 2rem;
-	padding: 0 var(--space-4);
+	padding: 0.5rem 0.75rem;
 	border: 0;
 	border-radius: var(--radius-s);
 	background: var(--color-control-bg);
 	color: var(--color-text);
 	font: inherit;
-	font-size: var(--text-small-size);
-	font-weight: var(--weight-heading);
-	letter-spacing: 0.02em;
+	font-size: var(--text-button-size);
+	font-weight: var(--weight-label);
+	line-height: 1;
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
 	cursor: pointer;
 	transition:
-		background-color 120ms ease-out,
+		background-color var(--ease-hover),
 		transform 100ms ease-out;
 }
 
@@ -89,7 +92,7 @@
 
 @media (pointer: coarse) {
 	.sampleButton {
-		min-height: 2.75rem;
+		padding: 1rem;
 	}
 }
 
@@ -122,21 +125,22 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	min-height: 3rem;
-	padding: var(--space-3) var(--space-6);
+	min-width: 16.25rem;
+	min-height: 4rem;
+	padding: 0 var(--space-5);
 	border: 0;
-	border-radius: var(--radius-pill);
+	border-radius: var(--radius-cta);
 	background: var(--color-accent);
 	color: var(--color-on-accent);
 	font: inherit;
-	font-size: var(--text-body-size);
+	font-size: 1.25rem;
 	font-weight: var(--weight-heading);
-	letter-spacing: 0.02em;
-	line-height: 1.2;
+	line-height: 1;
+	letter-spacing: var(--tracking);
 	cursor: pointer;
 	transition:
 		transform 100ms ease-out,
-		background-color 120ms ease-out;
+		background-color var(--ease-hover);
 }
 
 .chooseButton:hover:not([data-disabled]) {
@@ -208,9 +212,10 @@
 .sectionHeading {
 	color: var(--color-text-secondary);
 	font-size: var(--text-label-size);
-	font-weight: var(--weight-heading);
-	line-height: var(--text-small-leading);
+	font-weight: var(--weight-label);
+	line-height: 1.5;
 	letter-spacing: var(--text-label-tracking);
+	text-transform: uppercase;
 }
 
 .cards {
@@ -241,7 +246,15 @@
 	word-break: auto-phrase;
 	color: var(--color-text-secondary);
 	font-size: var(--text-body-size);
-	line-height: 1.7;
+	line-height: 1.5;
+}
+
+/* 幅が狭い画面では、主ボタンを枠の幅いっぱいにする */
+@media (max-width: 30rem) {
+	.chooseButton {
+		width: 100%;
+		min-width: 0;
+	}
 }
 
 @media (prefers-contrast: more) {

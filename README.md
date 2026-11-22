@@ -77,6 +77,13 @@ node scripts/import-report.ts <zip のパス>
 node scripts/make-demo-zip.ts <出力先のパス>
 ```
 
+## 書体について
+
+画面の書体は、[Noto Sans JP](https://fonts.google.com/noto/specimen/Noto+Sans+JP) と [Inter](https://rsms.me/inter/) です。
+どちらも [SIL Open Font License 1.1](https://openfontlicense.org/) で配布されています。
+書体のファイルは、npm のパッケージ（`@fontsource-variable/noto-sans-jp` と `@fontsource-variable/inter`）から取り込んでビルドに含め、アプリケーションと同じ場所から配信します。
+ライセンスの全文は、それぞれのパッケージの `LICENSE` にあります。
+
 ## League of Legends の品目名について
 
 ストアの取引に入っている品目 ID のうち、チャンピオンとスキンは名前に直して表示します。

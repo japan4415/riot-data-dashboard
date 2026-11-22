@@ -9,19 +9,20 @@
 }
 
 .retry {
-	min-height: 2.25rem;
-	padding: 0 var(--space-4);
+	padding: 0.5rem 0.75rem;
 	border: 0;
 	border-radius: var(--radius-s);
 	background: var(--color-control-bg);
 	color: var(--color-text);
 	font: inherit;
-	font-size: var(--text-small-size);
-	font-weight: var(--weight-heading);
-	letter-spacing: 0.02em;
+	font-size: var(--text-button-size);
+	font-weight: var(--weight-label);
+	line-height: 1;
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
 	cursor: pointer;
 	transition:
-		background-color 120ms ease-out,
+		background-color var(--ease-hover),
 		transform 100ms ease-out;
 }
 
@@ -36,7 +37,7 @@
 
 @media (pointer: coarse) {
 	.retry {
-		min-height: 2.75rem;
+		padding: 1rem;
 	}
 }
 

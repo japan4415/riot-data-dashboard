@@ -7,22 +7,36 @@
 
 .label {
 	color: var(--color-text-secondary);
-	font-size: var(--text-small-size);
-	letter-spacing: var(--text-small-tracking);
-	font-weight: var(--weight-strong);
+	font-family: var(--font-ui);
+	font-size: var(--text-button-size);
+	font-weight: 600;
+	letter-spacing: var(--tracking-ui);
 }
 
 .select {
-	min-height: 2rem;
-	padding: 0 var(--space-4);
+	min-height: 2.3125rem;
+	padding: 0 1.25rem;
 	border: 1px solid var(--color-separator-strong);
 	border-radius: var(--radius-pill);
 	background: transparent;
 	color: var(--color-text);
 	font: inherit;
-	font-size: var(--text-small-size);
+	font-family: var(--font-ui);
+	font-size: var(--text-button-size);
+	font-weight: 600;
+	letter-spacing: var(--tracking-ui);
 	cursor: pointer;
-	font-weight: var(--weight-strong);
+	transition: border-color var(--ease-hover);
+}
+
+.select:hover {
+	border-color: var(--color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.select {
+		transition: none;
+	}
 }
 
 /* 指で操作する端末では、押しやすい高さにする */

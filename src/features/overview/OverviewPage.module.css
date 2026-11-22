@@ -18,18 +18,18 @@
 	display: flex;
 	align-items: center;
 	gap: var(--space-2);
-	font-size: 1.125rem;
+	font-size: var(--text-title-size);
 	font-weight: var(--weight-heading);
 	line-height: var(--text-title-leading);
 	letter-spacing: var(--text-title-tracking);
 }
 
-/* 図表と同じ色の目印。文字は色で染めない */
+/* 図表と同じ色の目印。文字は色で染めない。形は、公式サイトのゲームの枠にならって斜めにする */
 .groupKey {
 	flex: none;
-	width: 0.625rem;
-	height: 0.625rem;
-	border-radius: 50%;
+	width: 0.4375rem;
+	height: 1rem;
+	transform: skewX(-14deg);
 }
 
 .groupFacts {
@@ -70,13 +70,39 @@
 }
 
 .more {
+	display: inline-flex;
+	align-items: center;
 	justify-self: start;
-	font-size: var(--text-small-size);
-	white-space: nowrap;
+	padding: 0.5rem 0.75rem;
+	border-radius: var(--radius-s);
+	background: var(--color-control-bg);
+	color: var(--color-text);
+	font-size: var(--text-button-size);
+	font-weight: var(--weight-label);
+	line-height: 1.3;
+	letter-spacing: var(--tracking);
+	text-decoration: none;
+	transition: background-color var(--ease-hover);
+}
+
+.more:hover {
+	background: var(--color-control-bg-hover);
 }
 
 .more:active {
 	opacity: 0.6;
+}
+
+@media (pointer: coarse) {
+	.more {
+		padding: 0.875rem 1rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.more {
+		transition: none;
+	}
 }
 
 @media (prefers-contrast: more) {

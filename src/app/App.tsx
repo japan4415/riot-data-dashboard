@@ -26,7 +26,9 @@ import { createScreenLoader, LazyScreen } from "./LazyScreen.tsx";
 import { MaskToggle } from "./MaskToggle.tsx";
 import { PeriodSelect } from "./PeriodSelect.tsx";
 
-const APP_NAME = "Riot データダッシュボード";
+/** アプリケーション名。幅が狭い帯では、この区切りで 2 行に折り返す */
+const APP_NAME_PARTS = ["Riot データ", "ダッシュボード"] as const;
+const APP_NAME = APP_NAME_PARTS.join("");
 const REPOSITORY_URL = "https://github.com/japan4415/riot-data-dashboard";
 
 interface Screen {
@@ -109,7 +111,11 @@ function Frame({ barAction, wide = false, children }: FrameProps) {
 			<header className={styles.bar}>
 				<div className={styles.barInner}>
 					<span className={styles.appName}>
-						<span className={styles.appNameText}>{APP_NAME}</span>
+						<span className={styles.appNameText}>
+							{APP_NAME_PARTS[0]}
+							<wbr />
+							{APP_NAME_PARTS[1]}
+						</span>
 					</span>
 					{barAction}
 				</div>
