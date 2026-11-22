@@ -9,11 +9,12 @@ import {
 	type ActivityIndex,
 	buildActivityIndex,
 } from "../analysis/activity.ts";
+import { type GameScreen, gameScreens } from "../analysis/games.ts";
 import { browserLocal, type ToLocal } from "../analysis/localTime.ts";
-import { recordYears } from "../analysis/overview.ts";
+import { recordSpan, recordYears } from "../analysis/overview.ts";
 import { ALL_PERIOD, type Period } from "../analysis/period.ts";
 import type { ImportResult } from "../import/importArchive.ts";
-import type { Dataset } from "../model/types.ts";
+import type { Dataset, EpochMs } from "../model/types.ts";
 
 interface DashboardValue {
 	result: ImportResult;
@@ -22,6 +23,10 @@ interface DashboardValue {
 	activity: ActivityIndex;
 	/** 記録がある年。古い順。 */
 	years: number[];
+	/** もっとも新しい記録の時刻。記録が無ければ null。 */
+	lastRecordAt: EpochMs | null;
+	/** 専用の画面を出せるゲーム。メニューに並べる順。 */
+	gameScreens: GameScreen[];
 	/** すべての画面で共通の、表示する期間。 */
 	period: Period;
 	setPeriod: (period: Period) => void;
@@ -42,18 +47,24 @@ export function DashboardProvider({
 }: DashboardProviderProps) {
 	const [period, setPeriod] = useState<Period>(ALL_PERIOD);
 
-	const value = useMemo<DashboardValue>(() => {
+	// 読み込んだデータから求める値は、期間を変えても作り直さない
+	const derived = useMemo(() => {
 		const dataset = result.dataset;
 		return {
 			result,
 			dataset,
 			activity: buildActivityIndex(dataset, browserLocal),
 			years: recordYears(dataset, browserLocal),
-			period,
-			setPeriod,
+			lastRecordAt: recordSpan(dataset)?.last ?? null,
+			gameScreens: gameScreens(dataset),
 			toLocal: browserLocal,
 		};
-	}, [result, period]);
+	}, [result]);
+
+	const value = useMemo<DashboardValue>(
+		() => ({ ...derived, period, setPeriod }),
+		[derived, period],
+	);
 
 	return (
 		<DashboardContext.Provider value={value}>

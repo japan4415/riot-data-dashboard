@@ -32,6 +32,7 @@ describe("暦の計算", () => {
 			day: 2,
 			weekday: 6,
 			hour: 0,
+			minute: 30,
 		});
 	});
 

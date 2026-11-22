@@ -55,12 +55,14 @@ export function ActivityPage() {
 					<StatRow>
 						<StatTile
 							label="活動した日数"
-							value={`${formatNumber(activeDays)} 日`}
+							value={formatNumber(activeDays)}
+							unit="日"
 						/>
 						{streak && (
 							<StatTile
 								label="最長の連続日数"
-								value={`${formatNumber(streak.length)} 日`}
+								value={formatNumber(streak.length)}
+								unit="日"
 								note={
 									streak.length > 1
 										? `${formatDayShort(streak.start)} 〜 ${formatDayShort(streak.end)}`

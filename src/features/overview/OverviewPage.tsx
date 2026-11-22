@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { Link } from "wouter";
+import type { ActivityGroup } from "../../analysis/activity.ts";
+import type { GameScreen } from "../../analysis/games.ts";
 import {
 	type GroupSummary,
 	groupSummaries,
@@ -16,6 +18,7 @@ import {
 	ACTIVITY_GROUP_LABELS,
 } from "../../labels/activity.ts";
 import {
+	durationQuantity,
 	formatDayShort,
 	formatDuration,
 	formatMoney,
@@ -27,10 +30,25 @@ import { GAME_ORDER, gameLabel } from "../../labels/games.ts";
 import type { GameId } from "../../model/types.ts";
 import { ActivityTrendCard } from "../activity/ActivityTrendCard.tsx";
 import { CalendarCard } from "../activity/CalendarCard.tsx";
+import { GAME_PATHS } from "../games/paths.ts";
 import pageStyles from "../Page.module.css";
 import styles from "./OverviewPage.module.css";
 
-function GroupCard({ summary }: { summary: GroupSummary }) {
+/** 活動の区分に対応する、ゲームの画面。TFT（モバイルほか）には専用の画面が無い。 */
+const GROUP_SCREENS: Readonly<Partial<Record<ActivityGroup, GameScreen>>> = {
+	"lol-tft-pc": "lol",
+	valorant: "valorant",
+	wildrift: "wildrift",
+	lor: "lor",
+};
+
+interface GroupCardProps {
+	summary: GroupSummary;
+	/** くわしい画面へのパス。画面が無ければ省く。 */
+	detailPath?: string;
+}
+
+function GroupCard({ summary, detailPath }: GroupCardProps) {
 	const { record } = summary;
 	return (
 		<li className={styles.group}>
@@ -95,13 +113,20 @@ function GroupCard({ summary }: { summary: GroupSummary }) {
 					試合履歴は、Riot の開示データに含まれません。
 				</p>
 			)}
+			{detailPath && (
+				<Link href={detailPath} className={styles.more}>
+					{summary.group === "lol-tft-pc"
+						? "League of Legends のストアの取引を見る"
+						: `${ACTIVITY_GROUP_LABELS[summary.group]} をくわしく見る`}
+				</Link>
+			)}
 		</li>
 	);
 }
 
 /** 概要の画面。アカウント全体の記録を要約する。 */
 export function OverviewPage() {
-	const { dataset, activity, period, toLocal } = useDashboard();
+	const { dataset, activity, period, toLocal, gameScreens } = useDashboard();
 
 	const span = useMemo(() => recordSpan(dataset), [dataset]);
 	const stats = useMemo(
@@ -120,6 +145,13 @@ export function OverviewPage() {
 		);
 	}, [dataset]);
 
+	const detailPath = (group: ActivityGroup) => {
+		const screen = GROUP_SCREENS[group];
+		return screen && gameScreens.includes(screen)
+			? GAME_PATHS[screen]
+			: undefined;
+	};
+
 	const calendarYear =
 		period.kind === "year" ? period.year : activity.years.at(-1);
 	const hasActivity = stats.activeDays > 0;
@@ -137,18 +169,20 @@ export function OverviewPage() {
 			<StatRow>
 				<StatTile
 					label="活動した日数"
-					value={`${formatNumber(stats.activeDays)} 日`}
+					value={formatNumber(stats.activeDays)}
+					unit="日"
 				/>
 				{stats.hasMatches && (
 					<>
 						<StatTile
 							label="試合数"
-							value={`${formatNumber(stats.matches)} 試合`}
+							value={formatNumber(stats.matches)}
+							unit="試合"
 							note="練習を除く"
 						/>
 						<StatTile
 							label="プレイ時間"
-							value={formatDuration(stats.playSeconds)}
+							{...durationQuantity(stats.playSeconds)}
 							note="試合履歴にある時間の合計"
 						/>
 					</>
@@ -178,7 +212,11 @@ export function OverviewPage() {
 					<h2 className={pageStyles.sectionHeading}>ゲームごとの記録</h2>
 					<ul className={styles.groups}>
 						{summaries.map((summary) => (
-							<GroupCard key={summary.group} summary={summary} />
+							<GroupCard
+								key={summary.group}
+								summary={summary}
+								detailPath={detailPath(summary.group)}
+							/>
 						))}
 					</ul>
 

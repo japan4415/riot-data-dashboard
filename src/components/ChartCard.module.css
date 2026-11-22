@@ -108,3 +108,11 @@
 		transition: none;
 	}
 }
+
+/* 指で操作する端末では、押しやすい大きさにする */
+@media (pointer: coarse) {
+	.toggleButton {
+		min-width: 3rem;
+		min-height: 2.5rem;
+	}
+}

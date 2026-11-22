@@ -16,6 +16,8 @@ export interface LocalParts {
 	weekday: number;
 	/** 0〜23 */
 	hour: number;
+	/** 0〜59 */
+	minute: number;
 }
 
 export type ToLocal = (at: EpochMs) => LocalParts;
@@ -29,6 +31,7 @@ export const browserLocal: ToLocal = (at) => {
 		day: date.getDate(),
 		weekday: date.getDay(),
 		hour: date.getHours(),
+		minute: date.getMinutes(),
 	};
 };
 
@@ -42,6 +45,7 @@ export function fixedOffset(offsetMinutes: number): ToLocal {
 			day: date.getUTCDate(),
 			weekday: date.getUTCDay(),
 			hour: date.getUTCHours(),
+			minute: date.getUTCMinutes(),
 		};
 	};
 }
@@ -89,4 +93,46 @@ export function dayKeyFromNumber(number: number): DayKey {
 /** 日付の曜日。0 = 日曜。 */
 export function weekdayOfDay(key: DayKey): number {
 	return new Date(dayNumber(key) * MS_PER_DAY).getUTCDay();
+}
+
+/** UTC とのずれとして考えられる最大の幅（−12 時間〜+14 時間）に、余裕を足したもの。 */
+const MAX_OFFSET_MS = 15 * 3_600_000;
+
+/**
+ * 利用者のタイムゾーンで、その月が始まる時刻を求める。
+ *
+ * `month` は 1〜12 のほか、13 以上も受け付ける（13 は翌年の 1 月）。
+ * `ToLocal` は時刻から暦への変換しか持たないので、暦が切り替わる時刻を二分探索で探す。
+ */
+export function startOfMonth(
+	year: number,
+	month: number,
+	toLocal: ToLocal,
+): EpochMs {
+	const targetYear = year + Math.floor((month - 1) / 12);
+	const targetMonth = ((month - 1) % 12) + 1;
+	const reached = (at: EpochMs) => {
+		const local = toLocal(at);
+		return (
+			local.year > targetYear ||
+			(local.year === targetYear && local.month >= targetMonth)
+		);
+	};
+
+	const utc = Date.UTC(targetYear, targetMonth - 1, 1);
+	let low = utc - MAX_OFFSET_MS;
+	let high = utc + MAX_OFFSET_MS;
+	while (high - low > 1) {
+		const middle = Math.floor((low + high) / 2);
+		if (reached(middle)) {
+			high = middle;
+		} else {
+			low = middle;
+		}
+	}
+	return high;
+}
+
+export function startOfYear(year: number, toLocal: ToLocal): EpochMs {
+	return startOfMonth(year, 1, toLocal);
 }

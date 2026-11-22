@@ -366,7 +366,7 @@ Riot Games にデータ開示を請求すると届く zip ファイルの構造�
 - `game_mode` が `Matchmaking` 以外のとき、`game_type` は `Not Applicable` になる。
 - `ShootingRange`（射撃場）は `game_outcome` がすべて `Loss` になる。`Deathmatch` もほぼすべて `Loss` である。勝率の計算からは除く必要がある。
 - 引き分けを表す値は観測していない。引き分けがどう記録されるかは未確認。
-- 内部コード名を表示名に変換する対応表は未作成である。
+- 内部コード名を表示名に変換する対応表は、一部だけを用意した（`docs/design.md` の 8 章）。
 
 ### valorant/valorant_payment_event_uc.json
 

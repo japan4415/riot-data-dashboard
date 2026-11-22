@@ -1,0 +1,124 @@
+.card {
+	display: grid;
+	gap: var(--space-4);
+	min-width: 0;
+	padding: var(--space-5);
+	border-radius: var(--radius-l);
+	background: var(--color-surface);
+}
+
+.header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: start;
+	justify-content: space-between;
+	gap: var(--space-3) var(--space-5);
+}
+
+.heading {
+	display: grid;
+	flex: 1 1 16rem;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.title {
+	font-size: var(--text-title-size);
+	font-weight: 600;
+	line-height: var(--text-title-leading);
+	letter-spacing: var(--text-title-tracking);
+}
+
+.description {
+	max-width: 44em;
+	text-wrap: pretty;
+	word-break: auto-phrase;
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-3) var(--space-4);
+}
+
+/* 表は横に長くなるので、枠の中で横にスクロールさせる */
+.tableScroll {
+	min-width: 0;
+	overflow-x: auto;
+	border: 1px solid var(--color-separator);
+	border-radius: var(--radius-m);
+}
+
+.footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-3) var(--space-4);
+}
+
+.range {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	font-variant-numeric: tabular-nums;
+	letter-spacing: var(--text-small-tracking);
+}
+
+.pager {
+	display: flex;
+	gap: var(--space-2);
+}
+
+.pageButton {
+	min-height: 2rem;
+	padding: 0 var(--space-4);
+	border: 1px solid var(--color-separator-strong);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-small-size);
+	cursor: pointer;
+	transition: transform 100ms ease-out;
+}
+
+/* 押した瞬間に反応を返す */
+.pageButton:active:not(:disabled) {
+	transform: scale(0.97);
+	background: var(--color-separator);
+}
+
+.pageButton:disabled {
+	border-color: var(--color-separator);
+	color: var(--color-text-secondary);
+	cursor: default;
+	opacity: 0.6;
+}
+
+@media (prefers-contrast: more) {
+	.card {
+		border: 1px solid var(--color-text);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pageButton {
+		transition: none;
+	}
+
+	.pageButton:active:not(:disabled) {
+		transform: none;
+	}
+}
+
+/* 指で操作する端末では、押しやすい高さにする */
+@media (pointer: coarse) {
+	.pageButton {
+		min-height: 2.75rem;
+	}
+}
