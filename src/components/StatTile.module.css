@@ -24,6 +24,7 @@
 	font-size: var(--text-small-size);
 	line-height: var(--text-small-leading);
 	letter-spacing: var(--text-small-tracking);
+	font-weight: var(--weight-strong);
 }
 
 /* 大きく見せる数値は、桁の幅をそろえない（そろえると間延びして見える） */
@@ -31,9 +32,9 @@
 	margin: 0;
 	/* 枠が狭いときは数値を少し小さくして、金額のような長い値が途中で折り返さないようにする */
 	font-size: clamp(1.25rem, 18cqi, 1.75rem);
-	font-weight: 700;
+	font-weight: var(--weight-heading);
 	line-height: 1.25;
-	letter-spacing: -0.01em;
+	letter-spacing: -0.03em;
 	/* 日本語の語の途中では折り返さない。空白の位置で折り返し、それでも収まらないときだけ途中で切る */
 	word-break: keep-all;
 	overflow-wrap: anywhere;
@@ -42,7 +43,7 @@
 /* 単位は数値より小さくして、数値を主役にする */
 .unit {
 	font-size: 1rem;
-	font-weight: 600;
+	font-weight: var(--weight-strong);
 	letter-spacing: 0;
 	white-space: nowrap;
 }

@@ -108,7 +108,9 @@ function Frame({ barAction, wide = false, children }: FrameProps) {
 		<div className={styles.shell} data-wide={wide || undefined}>
 			<header className={styles.bar}>
 				<div className={styles.barInner}>
-					<span className={styles.appName}>{APP_NAME}</span>
+					<span className={styles.appName}>
+						<span className={styles.appNameText}>{APP_NAME}</span>
+					</span>
 					{barAction}
 				</div>
 			</header>
@@ -116,28 +118,31 @@ function Frame({ barAction, wide = false, children }: FrameProps) {
 			{children}
 
 			<footer className={styles.footer}>
-				<div className={styles.legal}>
+				<div className={styles.footerInner}>
+					<div className={styles.legal}>
+						<p>
+							このサイトは Riot Games
+							が提供または承認するものではありません。Riot Games
+							と、それに関連する名称は、Riot Games, Inc.
+							の商標または登録商標です。
+						</p>
+						{/* Riot Games の「Legal Jibber Jabber」が、利用の条件として表示を求めている文言 */}
+						<p lang="en">
+							{APP_NAME} was created under Riot Games' "Legal Jibber Jabber"
+							policy using assets owned by Riot Games. Riot Games does not
+							endorse or sponsor this project.
+						</p>
+					</div>
 					<p>
-						このサイトは Riot Games が提供または承認するものではありません。Riot
-						Games と、それに関連する名称は、Riot Games, Inc.
-						の商標または登録商標です。
-					</p>
-					{/* Riot Games の「Legal Jibber Jabber」が、利用の条件として表示を求めている文言 */}
-					<p lang="en">
-						{APP_NAME} was created under Riot Games' "Legal Jibber Jabber"
-						policy using assets owned by Riot Games. Riot Games does not endorse
-						or sponsor this project.
+						<a
+							className={styles.footerLink}
+							href={REPOSITORY_URL}
+							rel="noreferrer"
+						>
+							ソースコード（GitHub）
+						</a>
 					</p>
 				</div>
-				<p>
-					<a
-						className={styles.footerLink}
-						href={REPOSITORY_URL}
-						rel="noreferrer"
-					>
-						ソースコード（GitHub）
-					</a>
-				</p>
 			</footer>
 		</div>
 	);

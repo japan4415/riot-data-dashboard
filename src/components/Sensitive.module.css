@@ -28,21 +28,28 @@
 .reveal {
 	min-height: 1.75rem;
 	padding: 0 var(--space-3);
-	border: 1px solid var(--color-separator-strong);
-	border-radius: 999px;
-	background: transparent;
+	border: 0;
+	border-radius: var(--radius-s);
+	background: var(--color-control-bg);
 	color: var(--color-text);
 	font: inherit;
 	font-size: var(--text-small-size);
-	line-height: 1;
+	font-weight: var(--weight-heading);
+	letter-spacing: 0.02em;
 	cursor: pointer;
-	transition: transform 100ms ease-out;
+	transition:
+		background-color 120ms ease-out,
+		transform 100ms ease-out;
+	line-height: 1;
+}
+
+.reveal:hover {
+	background: var(--color-control-bg-hover);
 }
 
 /* 押した瞬間に反応を返す */
 .reveal:active {
 	transform: scale(0.97);
-	background: var(--color-separator);
 }
 
 .body {
