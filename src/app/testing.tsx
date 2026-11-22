@@ -12,7 +12,7 @@ export function zipFile(bytes: Uint8Array, name = "export.zip"): File {
 }
 
 export function choose(file: File) {
-	fireEvent.change(screen.getByLabelText("zip ファイル"), {
+	fireEvent.change(screen.getByLabelText("zip ファイルを選ぶ"), {
 		target: { files: [file] },
 	});
 }
