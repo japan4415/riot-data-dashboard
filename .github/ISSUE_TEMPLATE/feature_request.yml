@@ -1,0 +1,34 @@
+name: 要望、提案
+description: 加えてほしい表示や、変えてほしい動きがあるときに使います
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **実物の開示データと、そこから写した値を貼らないでください。** この Issue は誰でも読めます。
+  - type: textarea
+    id: problem
+    attributes:
+      label: 困っていること、知りたいこと
+      description: いまの画面で、何ができなくて困っているかを書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案
+      description: どの画面に、何を表示すればよいかを書いてください。
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: もとになるデータ
+      description: 開示データのどのファイルの、どの項目から作れるかが分かれば書いてください。項目の名前だけを書き、値は書かないでください。
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 確認
+      options:
+        - label: 実物の開示データと、そこから写した値（ID、メールアドレス、IP アドレス、本文など）を含めていません
+          required: true
