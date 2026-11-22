@@ -71,6 +71,26 @@ describe("LazyScreen", () => {
 		).toBeDefined();
 	});
 
+	it("待っている間にほかの所で読み込みが済んでいたら、すぐに画面を出す", async () => {
+		// 最初の描画では未読み込み、その直後（先読みが終わったあと）には読み込み済み、という順番を再現する
+		let calls = 0;
+		const loader = {
+			load: vi.fn(() => new Promise<ComponentType>(() => {})),
+			loaded: () => {
+				calls += 1;
+				return calls === 1 ? null : Sample;
+			},
+		};
+
+		render(<LazyScreen loader={loader} />);
+
+		expect(
+			await screen.findByRole("heading", { name: "読み込んだ画面" }),
+		).toBeDefined();
+		// 読み込み済みなので、読み込みを始め直さない
+		expect(loader.load).not.toHaveBeenCalled();
+	});
+
 	it("読み込みに失敗しても落ちず、もう一度試せる", async () => {
 		const importer = vi
 			.fn<() => Promise<ComponentType>>()

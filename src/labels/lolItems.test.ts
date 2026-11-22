@@ -12,6 +12,16 @@ describe("lolItemName", () => {
 		expect(lolItemName("championsskin_1001")).toBe("ゴス アニー");
 	});
 
+	it("先頭に 0 が付いた ID も、同じ品目として引ける", () => {
+		expect(lolItemName("champions_001")).toBe("アニー");
+		expect(lolItemName("championsskin_01001")).toBe("ゴス アニー");
+	});
+
+	it("桁が多すぎる ID は null", () => {
+		expect(lolItemName(`champions_${"9".repeat(40)}`)).toBeNull();
+		expect(lolItemName(`championsskin_${"9".repeat(40)}`)).toBeNull();
+	});
+
 	it("対応表に無い ID は null", () => {
 		expect(lolItemName("champions_999999")).toBeNull();
 		expect(lolItemName("championsskin_999999999")).toBeNull();
@@ -44,15 +54,28 @@ describe("同梱している対応表", () => {
 		expect(LOL_ITEM_DATA_VERSION).toMatch(/^\d+(\.\d+)+$/);
 	});
 
-	it("名前に HTML のタグや制御文字を含まない", () => {
+	it("名前に HTML のタグや、見えない文字を含まない", () => {
 		const names = [
 			...Object.values(data.champions),
 			...Object.values(data.skins),
 		];
 		expect(names.length).toBeGreaterThan(1000);
-		// biome-ignore lint/suspicious/noControlCharactersInRegex: 制御文字が無いことを確かめる
-		const unsafe = names.filter((name) => /[<>\u0000-\u001f]/.test(name));
+		// 制御文字、文字の並ぶ向きを変える文字、幅の無い文字、行の区切り
+		const unsafe = names.filter((name) =>
+			/[<>\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u.test(name),
+		);
 		expect(unsafe).toEqual([]);
+	});
+
+	it("名前は空でなく、長すぎず、前後に空白が無い", () => {
+		const names = [
+			...Object.values(data.champions),
+			...Object.values(data.skins),
+		];
+		const odd = names.filter(
+			(name) => name.length === 0 || name.length > 100 || name !== name.trim(),
+		);
+		expect(odd).toEqual([]);
 	});
 
 	it("キーはすべて数値で、スキンはチャンピオンに属している", () => {

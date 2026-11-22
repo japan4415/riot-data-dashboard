@@ -497,7 +497,12 @@ describe("League of Legends の画面", () => {
 					storeRow(3, { item_id: "championsskin_103001", rp_delta: -975 }),
 					// 対応表に無いチャンピオンは、ID で示す
 					storeRow(4, { item_id: "championsskin_999999001" }),
-					// 贈り物として買ったものと、返金済みのものは数えない
+					// 贈り物として受け取ったものは数える
+					storeRow(8, {
+						type: "ITEM_TRANSFER_RECEIVED",
+						item_id: "championsskin_103004",
+					}),
+					// 人に贈ったものと、返金済みのものは数えない
 					storeRow(5, {
 						type: "PURCHASED_GIFT",
 						item_id: "championsskin_103002",
@@ -513,7 +518,7 @@ describe("League of Legends の画面", () => {
 
 		expect(tableRows(showTable("スキンが多いチャンピオン"))).toEqual([
 			["アニー", "2"],
-			["アーリ", "1"],
+			["アーリ", "2"],
 			["チャンピオン 999999", "1"],
 		]);
 	});

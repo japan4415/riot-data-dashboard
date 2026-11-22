@@ -60,7 +60,10 @@ export function LazyScreen({ loader }: LazyScreenProps) {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: 「もう一度試す」を押すたびに読み込み直す
 	useEffect(() => {
-		if (loader.loaded()) {
+		// 先読みなどで、この画面が待っている間に読み込みが済んでいることがある
+		const Screen = loader.loaded();
+		if (Screen) {
+			setState({ kind: "ready", Screen });
 			return;
 		}
 		let cancelled = false;

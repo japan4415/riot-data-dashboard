@@ -234,13 +234,20 @@ export interface ChampionSkins {
 	count: number;
 }
 
+/** スキンを手に入れたことを表す取引の種類。買ったものと、贈り物として受け取ったもの。 */
+const SKIN_ACQUIRED: ReadonlySet<Transaction["kind"]> = new Set([
+	"purchase",
+	"giftReceived",
+]);
+
 const SKIN_ITEM_ID = /^championsskin_(\d+)$/;
 
 /**
  * 手に入れたスキンの数を、チャンピオンごとに数える。多い順に並べる。
  *
  * スキンの品目 ID は「チャンピオンの ID × 1000 + スキンの番号」なので、
- * 1000 で割った商がチャンピオンの ID になる。贈り物として買ったものと、
+ * 1000 で割った商がチャンピオンの ID になる。番号 0 は通常の見た目で、スキンではない。
+ * 買ったものと、贈り物として受け取ったものを数える。人に贈ったものと、
  * 返金済みのものは含めない。
  */
 export function skinsByChampion(
@@ -248,12 +255,12 @@ export function skinsByChampion(
 ): ChampionSkins[] {
 	const counts = new Map<number, number>();
 	for (const transaction of transactions) {
-		if (transaction.kind !== "purchase" || transaction.refunded === true) {
+		if (!SKIN_ACQUIRED.has(transaction.kind) || transaction.refunded === true) {
 			continue;
 		}
 		const match = SKIN_ITEM_ID.exec(transaction.item.rawId ?? "");
 		const id = Number(match?.[1]);
-		if (!match || !Number.isSafeInteger(id) || id < 1000) {
+		if (!match || !Number.isSafeInteger(id) || id < 1000 || id % 1000 === 0) {
 			continue;
 		}
 		const championId = Math.floor(id / 1000);

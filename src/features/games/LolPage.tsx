@@ -291,8 +291,8 @@ function ChampionSkinCard({
 			title="スキンが多いチャンピオン"
 			description={
 				<>
-					購入として記録されたスキンを、チャンピオンごとに数えています。色違い（クロマ）も
-					1 個と数え、贈り物として買ったものと返金済みのものは除きます。
+					買ったスキンと、贈り物として受け取ったスキンを、チャンピオンごとに数えています。色違い（クロマ）も
+					1 個と数え、人に贈ったものと返金済みのものは除きます。
 					{champions.length > TOP_CHAMPIONS &&
 						`図には上位 ${TOP_CHAMPIONS} 体を出しています。全 ${formatNumber(champions.length)} 体は、表で確かめられます。`}
 				</>
