@@ -1,0 +1,75 @@
+.secret {
+	display: inline-flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-3);
+	min-width: 0;
+}
+
+.value {
+	overflow-wrap: anywhere;
+}
+
+.hidden {
+	color: var(--color-text-secondary);
+	letter-spacing: 0.08em;
+}
+
+/* 読み上げにだけ伝える文言 */
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.reveal {
+	min-height: 1.75rem;
+	padding: 0 var(--space-3);
+	border: 1px solid var(--color-separator-strong);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-small-size);
+	line-height: 1;
+	cursor: pointer;
+	transition: transform 100ms ease-out;
+}
+
+/* 押した瞬間に反応を返す */
+.reveal:active {
+	transform: scale(0.97);
+	background: var(--color-separator);
+}
+
+.body {
+	max-width: 44em;
+	overflow-wrap: anywhere;
+	white-space: pre-wrap;
+	line-height: 1.75;
+}
+
+.bodyHidden {
+	color: var(--color-text-secondary);
+}
+
+/* 指で操作する端末では、押しやすい高さにする */
+@media (pointer: coarse) {
+	.reveal {
+		min-height: 2.5rem;
+		padding-inline: var(--space-4);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.reveal {
+		transition: none;
+	}
+
+	.reveal:active {
+		transform: none;
+	}
+}

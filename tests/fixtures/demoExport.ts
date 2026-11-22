@@ -48,6 +48,17 @@ function eveningStart(day: number, random: () => number, weekend: boolean) {
 	return day + (hourJst - 9) * 3_600_000 + Math.floor(random() * 3_600_000);
 }
 
+/**
+ * その日のログインに記録する IP アドレス。文書用に予約されたアドレスだけを使う。
+ * 月が変わるとアドレスも変わり、モバイル回線（`mobile`）では IPv6 にする。
+ */
+function demoIp(day: number, mobile = false): string {
+	const month = Math.floor(day / (30 * DAY_MS));
+	return mobile
+		? `2001:db8::${(month % 60).toString(16)}`
+		: `203.0.113.${1 + (month % 48)}`;
+}
+
 const LOL: Era[] = [
 	{ from: "2016-01-01", to: "2019-01-01", chance: 0.3 },
 	{ from: "2019-01-01", to: "2021-01-01", chance: 0.42 },
@@ -371,6 +382,120 @@ function lorPurchases(random: () => number): Row[] {
 	return rows;
 }
 
+/** 現金での支払い。初めは米ドル、途中から日本円で払った、という設定にする。 */
+function lolPayments(random: () => number): Row[] {
+	const rows: Row[] = [];
+	const usd = ["5.0", "10.0", "20.0", "35.00"];
+	const jpy = ["650", "1300.00", "2600", "5200.00"];
+	for (let year = 2016; year <= 2026; year += 1) {
+		const times = 1 + Math.floor(random() * 3);
+		for (let n = 0; n < times; n += 1) {
+			const at =
+				Date.parse(`${year}-01-05`) + Math.floor(random() * 290) * DAY_MS;
+			const dollars = year < 2019;
+			const amounts = dollars ? usd : jpy;
+			rows.push({
+				amount: amounts[Math.floor(random() * amounts.length)],
+				created: stamp(at + 11 * 3_600_000),
+				currency_type: dollars ? "USD" : "JPY",
+				payment_type: dollars ? "paypal" : "SB_CreditCard",
+				store_account_id: dollars ? 1 : 2,
+				transaction_id: `JP1-00000000-0000-4000-8000-${String(700000 + rows.length).padStart(12, "0")}`,
+				transaction_number: `DEMO${String(rows.length).padStart(4, "0")}`,
+				user_ip: demoIp(at),
+			});
+		}
+	}
+	return rows;
+}
+
+const AUDIT_V1 = [
+	["ACCOUNT_STATE_CHANGED", "2016-01-03 02:10:00.0"],
+	["EMAIL_VALIDATION_REQUESTED", "2016-01-03 02:11:00.0"],
+	["SEND_VALIDATION_EMAIL", "2016-01-03 02:11:05"],
+	["PASSWORD_CHANGED", "2016-09-12 13:20:00"],
+	["PASSWORD_CHANGED", "2017-04-02 10:00:00"],
+	["EXCESSIVE_CHAT_TOXICITY", "2017-08-20 15:30:00"],
+	["PASSWORD_CHANGED", "2018-03-15 22:45:00"],
+] as const;
+
+const AUDIT_V2 = [
+	["EMAIL", "delivered", "2019-02-01 09:00:00"],
+	["USER_FIELD_CHANGED", "username", "2019-06-10 12:00:00"],
+	["FEDERATED_IDENTITY_CREATED", null, "2020-06-02 08:00:00"],
+	["LINKED_IDENTITY_CREATED", null, "2020-06-02 08:00:05"],
+	["IDENTITY_LINK_SUCCESS", null, "2020-06-02 08:00:10"],
+	["EMAIL", "delivered", "2021-11-20 03:00:00"],
+	["USER_FIELD_CHANGED", "email", "2022-05-05 05:00:00"],
+	["ANOMALOUS_ACTIVITY", null, "2023-09-09 18:00:00"],
+	["EMAIL", "delivered", "2023-09-09 18:01:00"],
+	["USER_FIELD_CHANGED", "password", "2023-09-09 18:30:00"],
+	["EMAIL", "delivered", "2026-03-01 01:00:00"],
+] as const;
+
+/** チャットログ。発言が無い試合のほうが多い。 */
+function chatLogFiles(): Record<string, unknown> {
+	const files: Record<string, unknown> = {};
+	const lines = [
+		["gl hf", "TEAM", "pre_game"],
+		["nice", "TEAM", "in_game"],
+		["bot に寄ります", "PARTY_1", "in_game"],
+		["gg wp", "TEAM", "post_game"],
+	] as const;
+	for (let n = 0; n < 12; n += 1) {
+		const gameId = 500000001 + n;
+		const day = `2026-${n < 6 ? "09" : "10"}-${String(2 + n * 2).padStart(2, "0")}`;
+		const logs: Record<string, unknown[]> = {
+			pre_game: [],
+			in_game: [],
+			post_game: [],
+		};
+		// 3 試合に 1 回だけ発言がある
+		if (n % 3 === 0) {
+			lines
+				.slice(0, n === 0 ? 4 : 2)
+				.forEach(([chat, sentTo, phase], index) => {
+					logs[phase]?.push({
+						chat,
+						riot_id: "Demo#0000",
+						sent_to: sentTo,
+						timestamp: Date.parse(`${day}T11:00:00Z`) + index * 240_000,
+					});
+				});
+		}
+		files[`leagueoflegends/chat_logs_v2_uc/successes/${gameId}.json`] = {
+			chat_logs: logs,
+			game_id: gameId,
+			match_date_utc: day,
+			platform_id: "jp1",
+			success: true,
+			was_failure: false,
+		};
+	}
+	files["teamfighttactics/tft_chat_logs_v2_uc/successes/600000001.json"] = {
+		chat_logs: {
+			in_game: [
+				{
+					chat: "おつかれさまでした",
+					riot_id: "Demo#0000",
+					sent_to: "TEAM",
+					timestamp: Date.parse("2026-10-20T12:30:00Z"),
+				},
+			],
+			post_game: [],
+			pre_game: [],
+		},
+		game_id: 600000001,
+		match_date_utc: "2026-10-20T12:05:00.000000+00:00",
+		match_id: "JP1_600000001",
+		platform_id: "jp1",
+		product: "tft",
+		success: true,
+		was_failure: false,
+	};
+	return files;
+}
+
 const WILD_RIFT_CHAMPIONS = [
 	"Ahri",
 	"Ashe",
@@ -409,14 +534,14 @@ export function demoExportFiles(seed = 20261122): Record<string, unknown> {
 				logins.push({
 					event_time_utc: stamp(at),
 					event_type: "Login",
-					ip_address: "203.0.113.7",
+					ip_address: demoIp(day),
 					product: "League/TFT PC",
 				});
 				at += (30 + random() * 60) * 60_000;
 				logins.push({
 					event_time_utc: stamp(at),
 					event_type: "Logout User",
-					ip_address: "203.0.113.7",
+					ip_address: demoIp(day),
 					product: "League/TFT PC",
 				});
 				at += 5 * 60_000;
@@ -471,7 +596,7 @@ export function demoExportFiles(seed = 20261122): Record<string, unknown> {
 			logins.push({
 				event_time_utc: stamp(at),
 				event_type: "Login",
-				ip_address: "203.0.113.9",
+				ip_address: demoIp(day, true),
 				product: "Wild Rift",
 			});
 			wildriftMatches.push({
@@ -495,7 +620,7 @@ export function demoExportFiles(seed = 20261122): Record<string, unknown> {
 			logins.push({
 				event_time_utc: stamp(at),
 				event_type: "Session Start",
-				ip_address: "203.0.113.7",
+				ip_address: demoIp(day),
 				product: "Legends of Runeterra",
 			});
 			lorMatches.push({
@@ -525,7 +650,7 @@ export function demoExportFiles(seed = 20261122): Record<string, unknown> {
 			logins.push({
 				event_time_utc: stamp(eveningStart(day, random, weekend)),
 				event_type: "Login",
-				ip_address: "203.0.113.9",
+				ip_address: demoIp(day, true),
 				product: "TFTm",
 			});
 		}
@@ -545,6 +670,90 @@ export function demoExportFiles(seed = 20261122): Record<string, unknown> {
 			email: "demo@example.com",
 			date_of_birth: "2000-01-01",
 		},
+		"riotAccount/account_audit_events_v1_uc.json": AUDIT_V1.map(
+			([action, eventDate]) => ({ action, event_date: eventDate }),
+		),
+		"riotAccount/account_audit_events_v2_uc.json": AUDIT_V2.map(
+			([eventType, description, eventDate]) => ({
+				event_type: eventType,
+				description,
+				event_date: eventDate,
+			}),
+		),
+		"leagueoflegends/summoner.json": {
+			lol_platform: "JP1",
+			riot_id: "Demo#0000",
+		},
+		"leagueoflegends/clash.json": { phone_number: "+81******0000" },
+		"leagueoflegends/grouped_reports.json": {
+			reports_made: { LEAVING_AFK: 7, ASSISTING_ENEMY_TEAM: 2 },
+			reports_received: { LEAVING_AFK: 1 },
+		},
+		"valorant/valorant_grouped_reports.json": {
+			reports_made: { LEAVING_AFK: 3 },
+			reports_received: {},
+		},
+		"penalties/penalty_history.json": [
+			{
+				date_issued: "2017-08-20T15:30:00Z",
+				is_manual: false,
+				restriction_reason: "DISRUPTIVE_COMMUNICATION",
+				restriction_type: "CHAT_RESTRICTION",
+				scope: "LEAGUE_OF_LEGENDS",
+				sentence: "TIMEOUT",
+				status: "LAPSED",
+			},
+			{
+				date_issued: "2019-03-02T09:00:00Z",
+				is_manual: true,
+				restriction_reason: "DISRUPTIVE_COMMUNICATION",
+				restriction_type: "SUSPENSION",
+				scope: "LEAGUE_OF_LEGENDS",
+				sentence: "TIMEOUT",
+				status: "LAPSED",
+			},
+		],
+		"zendesk/zendesk_tickets.json": {
+			"90000001": {
+				comments: [
+					{
+						author: "Player",
+						comment:
+							"購入した RP が反映されていません。\n\n決済は完了しているようです。確認をお願いします。",
+						create_datetime: "2019-06-10 11:00:00",
+					},
+					{
+						author: "Agent",
+						comment:
+							"お問い合わせありがとうございます。\n購入の記録を確認し、RP を付与しました。ゲームを再起動してご確認ください。",
+						create_datetime: "2019-06-11 02:30:00",
+					},
+					{
+						author: "Player",
+						comment: "反映されました。ありがとうございました。",
+						create_datetime: "2019-06-11 09:15:00",
+					},
+				],
+				create_datetime: "2019-06-10 11:00:00",
+				status: "closed",
+				subject: "購入した RP が反映されない",
+				ticket_id: "90000001",
+			},
+			"90000002": {
+				comments: [
+					{
+						author: "Player",
+						comment: "アカウントのデータの開示をお願いします。",
+						create_datetime: "2026-10-01 04:00:00",
+					},
+				],
+				create_datetime: "2026-10-01 04:00:00",
+				status: "open",
+				subject: "データの開示について",
+				ticket_id: "90000002",
+			},
+		},
+		...chatLogFiles(),
 		"riotAccount/atlas_login_event_uc.json": logins,
 		"valorant/valorant_match_history_uc.json": valorantMatches,
 		"valorant/valorant_payment_event_uc.json": [
@@ -571,16 +780,17 @@ export function demoExportFiles(seed = 20261122): Record<string, unknown> {
 				recipient_id: null,
 			},
 		],
-		"leagueoflegends/rp_purchase_history_uc.json": [
+		"leagueoflegends/rp_purchase_history_uc.json": lolPayments(detail),
+		"legendsofruneterra/lor_payment_history_event_uc.json": [
 			{
-				amount: "20.0",
-				created: "2017-05-01 12:00:00",
-				currency_type: "USD",
-				payment_type: "paypal",
-				store_account_id: 1,
-				transaction_id: "NA1-00000000-0000-4000-8000-0000000000a1",
-				transaction_number: "DEMO0001",
-				user_ip: "203.0.113.7",
+				country_code: "JP",
+				currency_code: "JPY",
+				game_currency_granted: 1090,
+				is_prepaid_card: false,
+				payment_method: "paypal",
+				payment_time_utc: "2020-02-11 10:00:00",
+				player_facing_purchase_id: "DEMO00000003",
+				real_currency_paid_x100: 120000,
 			},
 		],
 		"leagueoflegends/store_transactions_uc.json": lolStoreTransactions(detail),

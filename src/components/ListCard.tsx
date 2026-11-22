@@ -1,7 +1,8 @@
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { formatNumber } from "../labels/format.ts";
 import { type Column, DataTable } from "./DataTable.tsx";
 import styles from "./ListCard.module.css";
+import { SectionCard } from "./SectionCard.tsx";
 
 interface ListCardProps<Row> {
 	title: string;
@@ -39,7 +40,6 @@ export function ListCard<Row>({
 	pageSize = 25,
 	empty,
 }: ListCardProps<Row>) {
-	const headingId = useId();
 	const [state, setState] = useState({ rows, page: 0 });
 	if (state.rows !== rows) {
 		setState({ rows, page: 0 });
@@ -52,17 +52,7 @@ export function ListCard<Row>({
 	const setPage = (next: number) => setState({ rows, page: next });
 
 	return (
-		<section className={styles.card} aria-labelledby={headingId}>
-			<header className={styles.header}>
-				<div className={styles.heading}>
-					<h2 id={headingId} className={styles.title}>
-						{title}
-					</h2>
-					{description && <p className={styles.description}>{description}</p>}
-				</div>
-				{controls && <div className={styles.controls}>{controls}</div>}
-			</header>
-
+		<SectionCard title={title} description={description} controls={controls}>
 			{summary}
 
 			<div className={styles.tableScroll}>
@@ -102,6 +92,6 @@ export function ListCard<Row>({
 					</div>
 				)}
 			</div>
-		</section>
+		</SectionCard>
 	);
 }

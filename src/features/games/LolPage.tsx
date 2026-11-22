@@ -321,6 +321,10 @@ function TransactionCard({
 		filter !== "all" && kinds.some((entry) => entry.kind === filter)
 			? filter
 			: "all";
+	// 選択そのものも外し、あとでその種類の取引がある期間に戻っても、勝手に絞り込まない
+	if (active !== filter) {
+		setFilter("all");
+	}
 	const rows = useMemo(
 		() => (active === "all" ? all : all.filter((row) => row.kind === active)),
 		[all, active],

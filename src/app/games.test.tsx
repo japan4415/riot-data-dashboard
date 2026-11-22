@@ -48,6 +48,8 @@ describe("メニュー", () => {
 			"VALORANT",
 			"Legends of Runeterra",
 			"Wild Rift",
+			"課金",
+			"アカウント",
 			"読み込み結果",
 		]);
 		expect(within(menu()).getByRole("list", { name: "ゲーム" })).toBeDefined();

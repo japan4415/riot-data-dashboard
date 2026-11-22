@@ -1,4 +1,5 @@
 import { PageHeading } from "../../components/PageHeading.tsx";
+import { MaskedText } from "../../components/Sensitive.tsx";
 import { StatRow, StatTile } from "../../components/StatTile.tsx";
 import type {
 	ImportResult,
@@ -96,7 +97,10 @@ export function ImportReportPage({ result }: ImportReportPageProps) {
 												{KNOWN_KIND_IDS.has(entry.id) ? (
 													entry.label
 												) : (
-													<code className={styles.path}>{entry.label}</code>
+													// 包んでいるフォルダの名前（Riot ID を含むことがある）が残りうるので、伏せ字モードでは伏せる
+													<MaskedText>
+														<code className={styles.path}>{entry.label}</code>
+													</MaskedText>
 												)}
 												{entry.paths.length > 1 && (
 													<span className={styles.fileCount}>

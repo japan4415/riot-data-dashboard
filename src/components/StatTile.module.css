@@ -13,6 +13,8 @@
 	padding: var(--space-4) var(--space-5);
 	border-radius: var(--radius-l);
 	background: var(--color-surface);
+	/* 数値の大きさを、枠の幅に合わせて決められるようにする */
+	container-type: inline-size;
 }
 
 .label {
@@ -25,7 +27,8 @@
 /* 大きく見せる数値は、桁の幅をそろえない（そろえると間延びして見える） */
 .value {
 	margin: 0;
-	font-size: 1.75rem;
+	/* 枠が狭いときは数値を少し小さくして、金額のような長い値が途中で折り返さないようにする */
+	font-size: clamp(1.25rem, 18cqi, 1.75rem);
 	font-weight: 700;
 	line-height: 1.25;
 	letter-spacing: -0.01em;

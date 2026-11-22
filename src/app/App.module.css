@@ -41,6 +41,14 @@
 	padding-inline: var(--page-gutter);
 }
 
+/* 帯の右側に並べる操作 */
+.barControls {
+	display: flex;
+	flex: none;
+	align-items: center;
+	gap: var(--space-4);
+}
+
 .appName {
 	min-width: 0;
 	overflow: hidden;
