@@ -1,4 +1,4 @@
-import { type DragEvent, useEffect, useRef, useState } from "react";
+import { type DragEvent, useEffect, useState } from "react";
 import { ImportError } from "../../import/archive.ts";
 import type { ImportResult } from "../../import/importArchive.ts";
 import styles from "./ImportPage.module.css";
@@ -46,7 +46,6 @@ interface ImportPageProps {
 export function ImportPage({ onImported }: ImportPageProps) {
 	const [status, setStatus] = useState<Status>({ kind: "idle" });
 	const [dragging, setDragging] = useState(false);
-	const inputRef = useRef<HTMLInputElement>(null);
 	const reading = status.kind === "reading";
 
 	// 枠の外に落としたファイルをブラウザが開いてしまい、ページを離れるのを防ぐ
@@ -122,27 +121,28 @@ export function ImportPage({ onImported }: ImportPageProps) {
 					onDragLeave={handleDragLeave}
 					onDrop={handleDrop}
 				>
-					<input
-						ref={inputRef}
-						className={styles.fileInput}
-						type="file"
-						accept=".zip,application/zip"
-						aria-label="zip ファイル"
-						tabIndex={-1}
-						onChange={(event) => {
-							void read(event.target.files?.[0]);
-							// 同じファイルを選び直しても反応するように、選択を空に戻す
-							event.target.value = "";
-						}}
-					/>
-					<button
-						type="button"
+					{/*
+					 * ファイルの入力欄を、ボタンの見た目の label で包む。label を押すと、ブラウザが
+					 * 自分でファイルの選択画面を開く。スクリプトから入力欄を押す方法は、ブラウザや
+					 * その設定によっては選択画面が開かないので使わない。
+					 */}
+					<label
 						className={styles.chooseButton}
-						disabled={reading}
-						onClick={() => inputRef.current?.click()}
+						data-disabled={reading || undefined}
 					>
+						<input
+							className={styles.fileInput}
+							type="file"
+							accept=".zip,application/zip"
+							disabled={reading}
+							onChange={(event) => {
+								void read(event.target.files?.[0]);
+								// 同じファイルを選び直しても反応するように、選択を空に戻す
+								event.target.value = "";
+							}}
+						/>
 						{reading ? "読み込んでいます…" : "zip ファイルを選ぶ"}
-					</button>
+					</label>
 					<p className={styles.dropHint}>または、ここにファイルをドロップ</p>
 					<p className={styles.status} role="status">
 						{reading ? "データを読み込んでいます。" : ""}

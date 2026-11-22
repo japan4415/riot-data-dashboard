@@ -35,10 +35,24 @@ describe("App: 読み込み前", () => {
 		expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
 			"アカウントデータを振り返る",
 		);
-		expect(
-			screen.getByRole("button", { name: "zip ファイルを選ぶ" }),
-		).toBeDefined();
+		expect(screen.getByLabelText("zip ファイルを選ぶ")).toBeDefined();
 		expect(screen.queryByRole("navigation", { name: "画面" })).toBeNull();
+	});
+
+	it("ファイルの選択は、ブラウザが自分で開ける作りにする", () => {
+		render(<App />);
+
+		// スクリプトから入力欄を押す方法は、ブラウザによっては選択画面が開かない。
+		// 入力欄を label で包み、label を押せばブラウザが選択画面を開くようにしている
+		const input = screen.getByLabelText("zip ファイルを選ぶ");
+		expect(input).toBeInstanceOf(HTMLInputElement);
+		expect(input.getAttribute("type")).toBe("file");
+		expect(input.closest("label")?.textContent).toBe("zip ファイルを選ぶ");
+		// キーボードでも選べるよう、タブの移動の対象から外さない
+		expect(input.hasAttribute("tabindex")).toBe(false);
+		expect((input as HTMLInputElement).disabled).toBe(false);
+		// 選べるファイルを zip に絞る
+		expect(input.getAttribute("accept")).toBe(".zip,application/zip");
 	});
 
 	it("データをブラウザの外に出さないことを説明する", () => {
@@ -78,9 +92,9 @@ describe("App: 読み込み前", () => {
 
 		const alert = await screen.findByRole("alert");
 		expect(alert.textContent).toContain("zip ファイルとして読めませんでした");
-		expect(
-			screen.getByRole("button", { name: "zip ファイルを選ぶ" }),
-		).toBeDefined();
+		// 失敗したあとも、選び直せる
+		const input = screen.getByLabelText("zip ファイルを選ぶ");
+		expect((input as HTMLInputElement).disabled).toBe(false);
 	});
 
 	it("開示データではない zip には、その旨を表示する", async () => {

@@ -95,6 +95,10 @@
 	}
 }
 
+/*
+ * 入力欄そのものは見せないが、キーボードで選べるように、画面には残す
+ * （display: none にすると、フォーカスを置けなくなる）。
+ */
 .fileInput {
 	position: absolute;
 	width: 1px;
@@ -104,7 +108,12 @@
 	white-space: nowrap;
 }
 
+/* 入力欄を包む label。ボタンとして見せる */
 .chooseButton {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	min-height: 2.75rem;
 	padding: var(--space-3) var(--space-5);
 	border: 0;
@@ -122,14 +131,28 @@
 }
 
 /* 押した瞬間に反応を返す */
-.chooseButton:active:not(:disabled) {
+.chooseButton:active:not([data-disabled]) {
 	transform: scale(0.97);
 	opacity: 0.85;
 }
 
-.chooseButton:disabled {
+.chooseButton[data-disabled] {
 	opacity: 0.6;
 	cursor: progress;
+}
+
+/* キーボードで入力欄を選んだときは、ボタンの外側に枠を出す */
+.chooseButton:has(:focus-visible) {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+/* :has() が使えないブラウザでは、入力欄にフォーカスがある間は枠を出す */
+@supports not selector(:has(*)) {
+	.chooseButton:focus-within {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
+	}
 }
 
 .dropHint {
@@ -225,7 +248,7 @@
 		transition: none;
 	}
 
-	.chooseButton:active:not(:disabled) {
+	.chooseButton:active:not([data-disabled]) {
 		transform: none;
 	}
 }
