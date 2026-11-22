@@ -5,29 +5,25 @@
 }
 
 /*
- * 上部の帯は半透明の層にして、内容がその下を流れるようにする。
- * 境目は線で区切らず、帯の下端で背景色をぼかして重なりを示す。
+ * 上部の帯は、ライトでもダークでも暗い地にする。半透明の層にして、内容がその下を流れる
+ * ようにする。帯の中の部品は、ここで上書きした色を使うので、どちらの表示でも同じ見た目になる。
  */
 .bar {
 	position: sticky;
 	top: 0;
 	z-index: 10;
 	height: var(--bar-height);
-	background: color-mix(in srgb, var(--color-bg) 72%, transparent);
-	-webkit-backdrop-filter: blur(20px) saturate(180%);
-	backdrop-filter: blur(20px) saturate(180%);
-}
+	background: color-mix(in srgb, var(--color-chrome-bg) 92%, transparent);
+	-webkit-backdrop-filter: blur(20px) saturate(160%);
+	backdrop-filter: blur(20px) saturate(160%);
+	color: var(--color-chrome-text);
+	color-scheme: dark;
 
-.bar::after {
-	content: "";
-	position: absolute;
-	inset: 100% 0 auto;
-	height: var(--space-3);
-	background: linear-gradient(
-		color-mix(in srgb, var(--color-bg) 60%, transparent),
-		transparent
-	);
-	pointer-events: none;
+	--color-text: var(--color-chrome-text);
+	--color-text-secondary: var(--color-chrome-text-secondary);
+	--color-surface: var(--color-chrome-surface);
+	--color-separator-strong: rgb(249 249 249 / 0.36);
+	--color-control-bg: rgb(128 128 128 / 0.22);
 }
 
 .barInner {
@@ -50,13 +46,30 @@
 }
 
 .appName {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	min-width: 0;
+	font-size: var(--text-body-size);
+	font-weight: var(--weight-heading);
+	letter-spacing: 0.01em;
+	white-space: nowrap;
+}
+
+/* 名前の前に置く、斜めに傾けた赤い印。ロゴの代わりの目印で、Riot Games のロゴではない */
+.appName::before {
+	content: "";
+	flex: none;
+	width: 0.5rem;
+	height: 1.125rem;
+	background: var(--color-accent);
+	transform: skewX(-14deg);
+}
+
+.appNameText {
 	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	white-space: nowrap;
-	font-size: var(--text-body-size);
-	font-weight: 600;
-	letter-spacing: var(--text-title-tracking);
 }
 
 .main {
@@ -67,19 +80,26 @@
 	padding: var(--space-7) var(--page-gutter) var(--space-8);
 }
 
+/* 下部の表記も、ライトでもダークでも暗い地の帯にする */
 .footer {
+	background: var(--color-chrome-surface);
+	color: var(--color-chrome-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+
+	--color-link: var(--color-chrome-text);
+}
+
+.footerInner {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--space-2) var(--space-5);
+	gap: var(--space-3) var(--space-5);
 	justify-content: space-between;
 	width: 100%;
 	max-width: var(--content-width);
 	margin-inline: auto;
 	padding: var(--space-5) var(--page-gutter) var(--space-6);
-	color: var(--color-text-secondary);
-	font-size: var(--text-small-size);
-	line-height: var(--text-small-leading);
-	letter-spacing: var(--text-small-tracking);
 }
 
 /* 権利に関する表記。読める大きさを保ち、1 行が長くなりすぎないようにする */
@@ -103,7 +123,7 @@
 
 /* 読み込み後は、メニューと図表を並べるので幅を広く取る */
 .shell[data-wide] .barInner,
-.shell[data-wide] .footer {
+.shell[data-wide] .footerInner {
 	max-width: var(--dashboard-width);
 }
 
@@ -159,10 +179,10 @@
 .navHeading {
 	padding-inline: var(--space-3);
 	color: var(--color-text-secondary);
-	font-size: 0.75rem;
-	font-weight: 600;
+	font-size: var(--text-label-size);
+	font-weight: var(--weight-heading);
 	line-height: var(--text-small-leading);
-	letter-spacing: 0.04em;
+	letter-spacing: var(--text-label-tracking);
 }
 
 .navList {
@@ -171,24 +191,40 @@
 }
 
 .navLink {
+	position: relative;
 	display: block;
 	padding: var(--space-2) var(--space-3);
 	border-radius: var(--radius-s);
-	color: var(--color-text);
-	font-size: var(--text-body-size);
+	color: var(--color-text-secondary);
+	font-size: 0.875rem;
+	font-weight: var(--weight-strong);
 	line-height: 1.5;
 	text-decoration: none;
-	transition: background-color 100ms ease-out;
+	transition:
+		background-color 120ms ease-out,
+		color 120ms ease-out;
 }
 
 .navLink:hover {
 	background: var(--chart-hover);
+	color: var(--color-text);
 }
 
-/* いまいる画面を、地の色と太さで示す */
+/* いまいる画面を、文字の色と太さ、差し色の印で示す */
 .navLink[aria-current="page"] {
 	background: var(--color-control-bg);
-	font-weight: 600;
+	color: var(--color-text);
+	font-weight: var(--weight-heading);
+}
+
+.navLink[aria-current="page"]::before {
+	content: "";
+	position: absolute;
+	inset-block: 0.5rem;
+	inset-inline-start: 0;
+	width: 3px;
+	border-radius: var(--radius-pill);
+	background: var(--color-accent);
 }
 
 /* 押した瞬間に反応を返す */
@@ -200,19 +236,26 @@
 	justify-self: start;
 	min-height: 2rem;
 	padding: 0 var(--space-3);
-	border: 1px solid var(--color-separator-strong);
-	border-radius: 999px;
-	background: transparent;
-	color: var(--color-text-secondary);
+	border: 0;
+	border-radius: var(--radius-s);
+	background: var(--color-control-bg);
+	color: var(--color-text);
 	font: inherit;
 	font-size: var(--text-small-size);
+	font-weight: var(--weight-heading);
+	letter-spacing: 0.02em;
 	cursor: pointer;
-	transition: transform 100ms ease-out;
+	transition:
+		background-color 120ms ease-out,
+		transform 100ms ease-out;
+}
+
+.discard:hover {
+	background: var(--color-control-bg-hover);
 }
 
 .discard:active {
 	transform: scale(0.97);
-	background: var(--color-separator);
 }
 
 /* 幅が狭い画面では、メニューを内容の上に横に並べる */
@@ -277,6 +320,31 @@
 	.navLink {
 		white-space: nowrap;
 	}
+
+	/* 横に並べたときは、印を文字の下に置く */
+	.navLink[aria-current="page"]::before {
+		inset-block: auto 0;
+		inset-inline: var(--space-3);
+		width: auto;
+		height: 3px;
+	}
+}
+
+/* 幅がとても狭い画面では、帯の中を詰めて、アプリケーション名が読める幅を残す */
+@media (max-width: 30rem) {
+	.barInner {
+		gap: var(--space-3);
+	}
+
+	.barControls {
+		gap: var(--space-2);
+	}
+
+	.appName {
+		gap: var(--space-2);
+		font-size: 0.875rem;
+		letter-spacing: 0;
+	}
 }
 
 /* 指で操作する端末では、押しやすい高さにする */
@@ -291,9 +359,17 @@
 	}
 }
 
+/* 色を強制する表示では、地の色が使えない。いまいる画面の印を、システムの強調色で残す */
+@media (forced-colors: active) {
+	.navLink[aria-current="page"]::before {
+		background: Highlight;
+		forced-color-adjust: none;
+	}
+}
+
 @media (prefers-reduced-transparency: reduce) {
 	.bar {
-		background: var(--color-bg);
+		background: var(--color-chrome-bg);
 		-webkit-backdrop-filter: none;
 		backdrop-filter: none;
 	}
@@ -307,14 +383,14 @@
 	}
 
 	.bar {
-		background: var(--color-bg);
+		background: var(--color-chrome-bg);
 		-webkit-backdrop-filter: none;
 		backdrop-filter: none;
-		border-bottom: 1px solid var(--color-text);
+		border-bottom: 1px solid var(--color-chrome-text);
 	}
 
-	.bar::after {
-		display: none;
+	.footer {
+		border-top: 1px solid var(--color-chrome-text);
 	}
 }
 

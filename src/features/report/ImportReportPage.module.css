@@ -4,7 +4,7 @@
 
 .groupHeading {
 	font-size: var(--text-title-size);
-	font-weight: 600;
+	font-weight: var(--weight-heading);
 	line-height: var(--text-title-leading);
 	letter-spacing: var(--text-title-tracking);
 }
@@ -50,9 +50,9 @@
 
 .table thead th {
 	color: var(--color-text-secondary);
-	font-size: var(--text-small-size);
-	font-weight: 600;
-	letter-spacing: var(--text-small-tracking);
+	font-size: 0.75rem;
+	font-weight: var(--weight-heading);
+	letter-spacing: 0.04em;
 	white-space: nowrap;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .kind {
-	font-weight: 500;
+	font-weight: var(--weight-strong);
 }
 
 .path {

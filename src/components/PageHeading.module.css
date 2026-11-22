@@ -4,10 +4,10 @@
 }
 
 .heading {
-	font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
-	font-weight: 700;
-	line-height: 1.3;
-	letter-spacing: -0.012em;
+	font-size: clamp(1.875rem, 1.4rem + 2vw, 2.75rem);
+	font-weight: var(--weight-heading);
+	line-height: 1.15;
+	letter-spacing: var(--text-display-tracking);
 }
 
 /* フォーカスは画面の切り替えを伝えるためだけに移すので、枠は出さない */

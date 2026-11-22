@@ -1,54 +1,80 @@
 /*
  * 色、文字、余白などの共通の値。
  * 余白と文字の大きさは rem で持ち、利用者の文字サイズ設定に追従させる。
+ *
+ * 見た目は Riot Games の公式サイト（https://www.riotgames.com/ja）の雰囲気に寄せている。
+ * 暗い地、赤の差し色、太く詰めた見出し、角を小さく丸めた枠、丸い主ボタン、という特徴を
+ * 取り入れた。Riot Games のロゴ、画像、専用のフォントは使っていない。
  */
 :root {
 	color-scheme: light dark;
 
-	/* 文字 */
+	/* 文字。フォントは同梱せず、端末に入っているものを使う */
 	--font-sans:
-		system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI",
-		sans-serif;
+		"Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+		"Yu Gothic UI", Meiryo, system-ui, sans-serif;
 	--font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-	/* 大きい文字ほど行間と字間を詰める */
-	--text-display-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem);
-	--text-display-leading: 1.25;
-	--text-display-tracking: -0.015em;
-	--text-title-size: 1.125rem;
-	--text-title-leading: 1.4;
-	--text-title-tracking: -0.005em;
+	/* 見出しは太く、大きいほど行間と字間を詰める */
+	--weight-heading: 800;
+	--weight-strong: 700;
+	--text-display-size: clamp(2rem, 1.3rem + 3.2vw, 3.5rem);
+	--text-display-leading: 1.15;
+	--text-display-tracking: -0.03em;
+	--text-title-size: 1.25rem;
+	--text-title-leading: 1.35;
+	--text-title-tracking: -0.02em;
 	--text-body-size: 1rem;
 	--text-body-leading: 1.75;
 	--text-body-tracking: 0;
 	--text-small-size: 0.8125rem;
 	--text-small-leading: 1.6;
 	--text-small-tracking: 0.01em;
+	/* 小さな見出しやメニューの区切りに使う、太くて字間の広い文字 */
+	--text-label-size: 0.75rem;
+	--text-label-tracking: 0.08em;
 
 	/* 色 */
-	--color-bg: light-dark(#f5f5f7, #000000);
-	--color-surface: light-dark(#ffffff, #1c1c1e);
-	--color-text: light-dark(#1d1d1f, #f5f5f7);
-	--color-text-secondary: light-dark(#6e6e73, #a1a1a6);
-	--color-separator: light-dark(rgb(0 0 0 / 0.1), rgb(255 255 255 / 0.16));
-	--color-accent: light-dark(#0066cc, #2997ff);
+	--color-bg: light-dark(#ecebe8, #111111);
+	--color-surface: light-dark(#ffffff, #252423);
+	--color-text: light-dark(#141212, #f9f9f9);
+	--color-text-secondary: light-dark(#5f5d59, #a9a7a2);
+	--color-separator: light-dark(rgb(20 18 18 / 0.12), rgb(249 249 249 / 0.14));
+	--color-separator-strong: light-dark(
+		rgb(20 18 18 / 0.32),
+		rgb(249 249 249 / 0.36)
+	);
+	/* 差し色の赤。塗りつぶした部品と、フォーカスの枠に使う */
+	--color-accent: #d13639;
+	--color-accent-hover: #e04a4d;
+	--color-accent-pressed: #b62d30;
+	--color-on-accent: #ffffff;
+	--color-accent-soft: light-dark(#f8dfdf, #3b2021);
+	/* 文中のリンク。暗い地では赤が読みにくいので、文字の色に下線を付ける */
+	--color-link: light-dark(#b02629, #f9f9f9);
 	--color-notice-bg: light-dark(#fff4d6, #3a2f0f);
 	--color-notice-text: light-dark(#6b4e00, #ffd772);
-	--color-separator-strong: light-dark(
-		rgb(0 0 0 / 0.28),
-		rgb(255 255 255 / 0.32)
-	);
-	--color-accent-soft: light-dark(#e8f1fc, #0f2740);
-	--color-on-accent: light-dark(#ffffff, #00101f);
 	--color-error-bg: light-dark(#fdecea, #3b1513);
 	--color-error-text: light-dark(#8c1d18, #ffb4ab);
 	--color-success-text: light-dark(#1b6b3a, #7ddc9f);
-	--color-tooltip-bg: light-dark(#ffffff, #2c2c2e);
-	--color-control-bg: light-dark(#e9e9ee, #2c2c2e);
-	--color-control-selected: light-dark(#ffffff, #636366);
+	--color-tooltip-bg: light-dark(#ffffff, #33322f);
+	/* 補助的なボタンや、切り替えの地 */
+	--color-control-bg: light-dark(rgb(20 18 18 / 0.08), rgb(128 128 128 / 0.22));
+	--color-control-bg-hover: light-dark(
+		rgb(20 18 18 / 0.14),
+		rgb(128 128 128 / 0.34)
+	);
+	/* 切り替えで選んでいる側。地と文字の色を反転させて示す */
+	--color-control-selected: light-dark(#141212, #f9f9f9);
+	--color-on-control-selected: light-dark(#ffffff, #141212);
+	/* 上部の帯と下部の表記は、ライトでも暗い地にする */
+	--color-chrome-bg: #111111;
+	--color-chrome-surface: #252423;
+	--color-chrome-text: #f9f9f9;
+	--color-chrome-text-secondary: #a9a7a2;
 
 	/*
-	 * 図表の色。検証済みの配色から、この画面の地の色（白と #1c1c1e）で確かめたもの。
+	 * 図表の色。検証済みの配色から、この画面の地の色（白と #252423）で確かめたもの。
 	 * 系列の色は活動の区分に固定で割り当て、並び順も変えない（隣り合う色の見分けやすさを保つため）。
 	 */
 	--chart-series-1: light-dark(#2a78d6, #3987e5);
@@ -57,14 +83,14 @@
 	--chart-series-4: light-dark(#eda100, #c98500);
 	--chart-series-5: light-dark(#e87ba4, #d55181);
 	/* 量を表す濃淡。0 は「記録なし」。ダークでは多いほど明るくする */
-	--chart-level-0: light-dark(#ebebf0, #2c2c2e);
-	--chart-level-1: light-dark(#86b6ef, #184f95);
-	--chart-level-2: light-dark(#5598e7, #256abf);
-	--chart-level-3: light-dark(#256abf, #3987e5);
-	--chart-level-4: light-dark(#104281, #86b6ef);
-	--chart-grid: light-dark(#e6e6eb, #2c2c2e);
-	--chart-axis: light-dark(#c7c7cc, #48484a);
-	--chart-hover: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
+	--chart-level-0: light-dark(#e6e5e1, #383735);
+	--chart-level-1: light-dark(#86b6ef, #2364b6);
+	--chart-level-2: light-dark(#5598e7, #3987e5);
+	--chart-level-3: light-dark(#256abf, #6ea7eb);
+	--chart-level-4: light-dark(#104281, #a9cbf4);
+	--chart-grid: light-dark(#e6e5e1, #383735);
+	--chart-axis: light-dark(#c4c2bd, #5c5a56);
+	--chart-hover: light-dark(rgb(20 18 18 / 0.05), rgb(249 249 249 / 0.07));
 
 	/* 余白 */
 	--space-1: 0.25rem;
@@ -76,10 +102,11 @@
 	--space-7: 3rem;
 	--space-8: 4.5rem;
 
-	/* 形 */
-	--radius-s: 0.5rem;
-	--radius-m: 0.875rem;
-	--radius-l: 1.25rem;
+	/* 形。枠の角は小さく丸め、主ボタンと入力欄は丸くする */
+	--radius-s: 0.375rem;
+	--radius-m: 0.5rem;
+	--radius-l: 0.5rem;
+	--radius-pill: 999px;
 
 	/* 配置 */
 	--content-width: 60rem;
@@ -87,5 +114,5 @@
 	--dashboard-width: 76rem;
 	--nav-width: 12.5rem;
 	--page-gutter: clamp(1rem, 4vw, 2rem);
-	--bar-height: 3rem;
+	--bar-height: 3.5rem;
 }
