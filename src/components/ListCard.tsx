@@ -12,6 +12,10 @@ interface ListCardProps<Row> {
 	/** 一覧の上に置く要約。 */
 	summary?: ReactNode;
 	columns: ReadonlyArray<Column<Row>>;
+	/**
+	 * 表示する行。中身が変わらない間は、同じ配列を渡すこと（`useMemo` などで保つ）。
+	 * 配列が入れ替わると先頭のページに戻すので、描画のたびに作り直すと描画が止まらなくなる。
+	 */
 	rows: readonly Row[];
 	rowKey: (row: Row) => string | number;
 	pageSize?: number;

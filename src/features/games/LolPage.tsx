@@ -5,7 +5,7 @@ import {
 	balanceSeries,
 	type CategoryPurchases,
 	type Gift,
-	gifts,
+	giftsInPeriod,
 	PAID_WITH,
 	purchasesByCategory,
 	storeSummary,
@@ -219,9 +219,17 @@ function CategoryCard({
 	);
 }
 
-function GiftCard({ transactions }: { transactions: readonly Transaction[] }) {
-	const { toLocal } = useDashboard();
-	const rows = useMemo(() => gifts(transactions), [transactions]);
+interface GiftCardProps {
+	/** すべての期間の取引。古い順。 */
+	transactions: readonly Transaction[];
+}
+
+function GiftCard({ transactions }: GiftCardProps) {
+	const { period, toLocal } = useDashboard();
+	const rows = useMemo(
+		() => giftsInPeriod(transactions, period, toLocal),
+		[transactions, period, toLocal],
+	);
 
 	const columns = useMemo<Column<Gift>[]>(
 		() => [
@@ -423,7 +431,7 @@ export function LolPage() {
 			<BalanceCard transactions={all} currency="RP" />
 			<BalanceCard transactions={all} currency="BE" />
 			<CategoryCard transactions={transactions} />
-			<GiftCard transactions={transactions} />
+			<GiftCard transactions={all} />
 			<TransactionCard transactions={transactions} />
 		</GamePage>
 	);

@@ -115,3 +115,10 @@
 		transform: none;
 	}
 }
+
+/* 指で操作する端末では、押しやすい高さにする */
+@media (pointer: coarse) {
+	.pageButton {
+		min-height: 2.75rem;
+	}
+}

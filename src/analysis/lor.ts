@@ -1,5 +1,6 @@
 import type { LorMatch } from "../model/types.ts";
 import { type WinLoss, winLoss } from "./matches.ts";
+import { extent, median } from "./stats.ts";
 
 /** 練習（チュートリアル、対 AI 戦）を除いた試合。LoR の集計はこれを対象にする。 */
 function ratedMatches(matches: readonly LorMatch[]): LorMatch[] {
@@ -67,7 +68,7 @@ export function turnHistogram(
 	if (rated.length === 0) {
 		return [];
 	}
-	const maxTurn = Math.max(...rated.map((match) => match.turnCount ?? 0));
+	const maxTurn = extent(rated.map((match) => match.turnCount ?? 0))?.max ?? 0;
 	const count = Math.min(MAX_TURN_BINS, Math.floor(maxTurn / binSize) + 1);
 	const bins: TurnBin[] = Array.from({ length: count }, (_, index) => ({
 		from: index * binSize,
@@ -98,10 +99,11 @@ export function turnHistogram(
 
 /** ターン数の中央値。記録が無ければ null。 */
 export function medianTurns(matches: readonly LorMatch[]): number | null {
-	const turns = ratedMatches(matches)
-		.flatMap((match) => (match.turnCount === null ? [] : [match.turnCount]))
-		.sort((a, b) => a - b);
-	return turns[Math.floor(turns.length / 2)] ?? null;
+	return median(
+		ratedMatches(matches).flatMap((match) =>
+			match.turnCount === null ? [] : [match.turnCount],
+		),
+	);
 }
 
 export interface ReasonRecord extends WinLoss {

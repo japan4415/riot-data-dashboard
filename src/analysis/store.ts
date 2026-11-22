@@ -76,6 +76,55 @@ export interface BalanceSeries {
 	opening: number | null;
 }
 
+interface BalanceRow {
+	/** 取引後の残高。 */
+	amount: number;
+	/** この取引での増減。 */
+	delta: number;
+}
+
+/**
+ * 同じ時刻に記録された取引の、最後の残高を求める。
+ *
+ * 同じ時刻の行は、元データの並びが取引の順とは限らない。そこで、増減のある行を
+ * 「取引前の残高 → 取引後の残高」のつながりとして並べ直し、その終点を採る。
+ * つながりをたどりきれないとき（記録が欠けているなど）は、元の並びで最後の行の残高を使う。
+ */
+function settledBalance(
+	rows: readonly BalanceRow[],
+	previous: number | null,
+): number {
+	const fallback = rows.at(-1)?.amount ?? 0;
+	const steps = rows
+		.filter((row) => row.delta !== 0)
+		.map((row) => ({ from: row.amount - row.delta, to: row.amount }));
+	const first = steps[0];
+	if (!first) {
+		return fallback;
+	}
+
+	// 直前の残高から始める。そこから始まる行が無ければ、どの行の結果でもない残高から始める
+	let current =
+		previous !== null && steps.some((step) => step.from === previous)
+			? previous
+			: (
+					steps.find(
+						(step) => !steps.some((other) => other.to === step.from),
+					) ?? first
+				).from;
+	const remaining = [...steps];
+	for (;;) {
+		const index = remaining.findIndex((step) => step.from === current);
+		const step = remaining[index];
+		if (!step) {
+			break;
+		}
+		current = step.to;
+		remaining.splice(index, 1);
+	}
+	return remaining.length === 0 ? current : fallback;
+}
+
 /**
  * 取引後の残高を時系列に並べる。`transactions` は古い順に並んでいること。
  */
@@ -85,8 +134,8 @@ export function balanceSeries(
 	period: Period,
 	toLocal: ToLocal = browserLocal,
 ): BalanceSeries {
-	const points: BalancePoint[] = [];
-	let opening: number | null = null;
+	// 同じ時刻の取引をまとめ、まとまりごとに最後の残高を決める
+	const moments: Array<{ at: EpochMs; rows: BalanceRow[] }> = [];
 	for (const transaction of transactions) {
 		const balance = transaction.balances.find(
 			(entry) => entry.currency === currency,
@@ -94,19 +143,31 @@ export function balanceSeries(
 		if (!balance) {
 			continue;
 		}
-		const year = toLocal(transaction.at).year;
-		if (period.kind === "year" && year < period.year) {
-			opening = balance.amount;
-			continue;
-		}
-		if (!inPeriod(period, year)) {
-			continue;
-		}
-		const last = points.at(-1);
+		const row: BalanceRow = {
+			amount: balance.amount,
+			delta:
+				transaction.deltas.find((entry) => entry.currency === currency)
+					?.amount ?? 0,
+		};
+		const last = moments.at(-1);
 		if (last && last.at === transaction.at) {
-			last.amount = balance.amount;
+			last.rows.push(row);
 		} else {
-			points.push({ at: transaction.at, amount: balance.amount });
+			moments.push({ at: transaction.at, rows: [row] });
+		}
+	}
+
+	const points: BalancePoint[] = [];
+	let opening: number | null = null;
+	let previous: number | null = null;
+	for (const moment of moments) {
+		const amount = settledBalance(moment.rows, previous);
+		previous = amount;
+		const year = toLocal(moment.at).year;
+		if (period.kind === "year" && year < period.year) {
+			opening = amount;
+		} else if (inPeriod(period, year)) {
+			points.push({ at: moment.at, amount });
 		}
 	}
 	return { points, opening };
@@ -265,6 +326,8 @@ export function gifts(transactions: readonly Transaction[]): Gift[] {
 				const purchase = purchases.find(
 					(candidate) =>
 						!paired.has(candidate) &&
+						// 品目が分からない行どうしは、同じ贈り物かどうかを判断できない
+						transaction.item.rawId !== null &&
 						candidate.item.rawId === transaction.item.rawId &&
 						Math.abs(candidate.at - transaction.at) <= GIFT_PAIR_WINDOW_MS,
 				);
@@ -319,4 +382,20 @@ export function gifts(transactions: readonly Transaction[]): Gift[] {
 	}
 
 	return result.sort((a, b) => b.at - a.at);
+}
+
+/**
+ * 期間内の贈り物。
+ *
+ * 支払いの行と品目を移す行が年をまたぐことがあるので、先にすべての取引で 1 件ずつに
+ * まとめてから、贈り物の時刻で絞り込む。
+ */
+export function giftsInPeriod(
+	transactions: readonly Transaction[],
+	period: Period,
+	toLocal: ToLocal = browserLocal,
+): Gift[] {
+	return gifts(transactions).filter((gift) =>
+		inPeriod(period, toLocal(gift.at).year),
+	);
 }

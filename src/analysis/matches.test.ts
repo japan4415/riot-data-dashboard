@@ -91,8 +91,8 @@ describe("winLoss / matchSummary", () => {
 			matches: 4,
 			practice: 1,
 			playSeconds: (40 + 30 + 20 + 10 + 5) * 60,
-			// 練習を除いた 5, 20, 30, 40 分の、後ろ寄りの中央
-			medianSeconds: 30 * 60,
+			// 練習を除いた 5, 20, 30, 40 分の中央値。件数が偶数なので、中央の 2 つの平均
+			medianSeconds: 25 * 60,
 		});
 	});
 

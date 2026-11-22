@@ -26,13 +26,16 @@ export const QUEUE_CATEGORY_COLORS: Readonly<Record<QueueCategory, string>> = {
  * 開示データには `Ranked` のような一般的な名前と、`Hurm` のようなコード名が混ざっている。
  * 一般的な名前はそのまま表示し、対応が分かっているコード名だけを置き換える。
  * 対応が分からないもの（`Fortcollins` など）は、元の値のまま表示する。
+ *
+ * 元データの文字列で引くので、オブジェクトではなく Map にする
+ * （`constructor` などの名前に反応させない）。
  */
-const CODE_NAMES: Readonly<Record<string, string>> = {
-	hurm: "Team Deathmatch",
-	ggteam: "Escalation",
-	onefa: "Replication",
-	newmap: "New Map",
-};
+const CODE_NAMES: ReadonlyMap<string, string> = new Map([
+	["hurm", "Team Deathmatch"],
+	["ggteam", "Escalation"],
+	["onefa", "Replication"],
+	["newmap", "New Map"],
+]);
 
 export interface QueueLabel {
 	label: string;
@@ -45,7 +48,7 @@ export function queueLabel(name: string | null): QueueLabel {
 	if (name === null) {
 		return { label: "種別の記録なし", raw: null };
 	}
-	const display = CODE_NAMES[name.toLowerCase()];
+	const display = CODE_NAMES.get(name.toLowerCase());
 	return display === undefined
 		? { label: name, raw: null }
 		: { label: display, raw: name };

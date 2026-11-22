@@ -43,6 +43,9 @@ describe("parseRank", () => {
 		expect(parseRank("Mythic I")).toBeNull();
 		expect(parseRank("Gold V")).toBeNull();
 		expect(parseRank("Gold III extra")).toBeNull();
+		// オブジェクトが元から持つ名前を、段階として読まない
+		expect(parseRank("Gold constructor")).toBeNull();
+		expect(parseRank("__proto__ I")).toBeNull();
 	});
 });
 

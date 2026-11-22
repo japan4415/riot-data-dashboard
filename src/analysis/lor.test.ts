@@ -96,6 +96,22 @@ describe("turnHistogram", () => {
 		});
 	});
 
+	it("区切りの数がちょうど上限のときは、最後の区切りを閉じたままにする", () => {
+		// 0〜79 ターンは 16 区切りにちょうど収まる
+		const closed = turnHistogram([
+			lorMatch("2021-01-01T00:00:00Z", { turnCount: 79 }),
+		]);
+		expect(closed).toHaveLength(16);
+		expect(closed.at(-1)).toMatchObject({ from: 75, to: 79, wins: 1 });
+
+		// 80 ターンからは、最後の区切りにまとめる
+		const open = turnHistogram([
+			lorMatch("2021-01-01T00:00:00Z", { turnCount: 80 }),
+		]);
+		expect(open).toHaveLength(16);
+		expect(open.at(-1)).toMatchObject({ from: 75, to: null, wins: 1 });
+	});
+
 	it("ターン数の記録が無ければ空", () => {
 		expect(turnHistogram([lorMatch("2021-01-01T00:00:00Z")])).toEqual([]);
 	});
@@ -104,6 +120,15 @@ describe("turnHistogram", () => {
 describe("medianTurns", () => {
 	it("練習を除いた試合の中央値を返す", () => {
 		expect(medianTurns(matches)).toBe(12);
+	});
+
+	it("件数が偶数なら、中央の 2 つの平均を返す", () => {
+		expect(
+			medianTurns([
+				lorMatch("2021-01-01T00:00:00Z", { turnCount: 10 }),
+				lorMatch("2021-01-02T00:00:00Z", { turnCount: 13 }),
+			]),
+		).toBe(11.5);
 	});
 
 	it("記録が無ければ null", () => {

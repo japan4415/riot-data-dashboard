@@ -31,11 +31,11 @@ import { QueueRecordCard } from "./QueueRecordCard.tsx";
 import { WinLossText } from "./WinLossText.tsx";
 
 /** 決着の理由の、日本語での補足。対応が分からない値には付けない。 */
-const REASON_NOTES: Readonly<Record<string, string>> = {
-	concession: "降参",
-	"zero health": "体力が 0",
-	disconnect: "切断",
-};
+const REASON_NOTES: ReadonlyMap<string, string> = new Map([
+	["concession", "降参"],
+	["zero health", "体力が 0"],
+	["disconnect", "切断"],
+]);
 
 function comboLabel(combo: FactionCombo): string {
 	return combo.factions.length === 0
@@ -190,7 +190,7 @@ function ReasonCard({ matches }: { matches: readonly LorMatch[] }) {
 				record,
 				record.reason === null
 					? undefined
-					: REASON_NOTES[record.reason.toLowerCase()],
+					: REASON_NOTES.get(record.reason.toLowerCase()),
 			),
 		);
 		return { reasons, series, rows };

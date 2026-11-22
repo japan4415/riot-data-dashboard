@@ -247,6 +247,18 @@
 	}
 }
 
+/* 指で操作する端末では、押しやすい高さにする */
+@media (pointer: coarse) {
+	.navLink {
+		padding-block: var(--space-3);
+	}
+
+	.discard {
+		min-height: 2.75rem;
+		padding-inline: var(--space-4);
+	}
+}
+
 @media (prefers-reduced-transparency: reduce) {
 	.bar {
 		background: var(--color-bg);
@@ -256,6 +268,12 @@
 }
 
 @media (prefers-contrast: more) {
+	/* 端をぼかさず、文字をくっきり見せる */
+	.navGroups {
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+
 	.bar {
 		background: var(--color-bg);
 		-webkit-backdrop-filter: none;

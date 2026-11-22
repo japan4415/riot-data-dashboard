@@ -25,12 +25,13 @@ export const RANK_TIERS = [
 /** 1 つのティアに含まれる段階の数（IV〜I）。 */
 export const DIVISIONS_PER_TIER = 4;
 
-const DIVISIONS: Readonly<Record<string, number>> = {
-	I: 1,
-	II: 2,
-	III: 3,
-	IV: 4,
-};
+// 元データの文字列で引くので、オブジェクトではなく Map にする（`constructor` などの名前に反応させない）
+const DIVISIONS: ReadonlyMap<string, number> = new Map([
+	["I", 1],
+	["II", 2],
+	["III", 3],
+	["IV", 4],
+]);
 
 export interface ParsedRank {
 	tier: string;
@@ -62,7 +63,7 @@ export function parseRank(rank: string | null): ParsedRank | null {
 	}
 	let division: number | null = null;
 	if (divisionText !== undefined) {
-		division = DIVISIONS[divisionText.toUpperCase()] ?? null;
+		division = DIVISIONS.get(divisionText.toUpperCase()) ?? null;
 		if (division === null) {
 			return null;
 		}

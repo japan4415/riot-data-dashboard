@@ -48,8 +48,8 @@ interface StepLineChartProps<Point extends LinePoint> {
 	tooltip: (point: Point) => ReactNode;
 }
 
-/** `x` がもっとも近い点の位置を返す。 */
-function nearestIndex(points: readonly LinePoint[], x: number): number {
+/** `x` がもっとも近い点の位置を返す。同じ距離なら、右の点を返す。 */
+export function nearestIndex(points: readonly LinePoint[], x: number): number {
 	let low = 0;
 	let high = points.length - 1;
 	while (low < high) {
@@ -106,12 +106,12 @@ export function StepLineChart<Point extends LinePoint>({
 		const domainX = xDomain ?? [firstX, lastX === firstX ? firstX + 1 : lastX];
 		const xScale = scaleLinear().domain(domainX).range([left, plotRight]);
 
-		const values = points.map((point) => point.y);
-		if (opening !== null) {
-			values.push(opening);
+		let top = Math.max(1, opening ?? 0);
+		for (const point of points) {
+			top = Math.max(top, point.y);
 		}
 		const yScale = scaleLinear()
-			.domain(yDomain ?? [0, Math.max(1, ...values)])
+			.domain(yDomain ?? [0, top])
 			.range([plotBottom, MARGIN.top]);
 		if (!yDomain) {
 			yScale.nice(4);
@@ -172,7 +172,8 @@ export function StepLineChart<Point extends LinePoint>({
 			return;
 		}
 		const last = points.length - 1;
-		const current = selected ?? last;
+		// 点の数が減ったあとでも、範囲の中から動かす
+		const current = Math.min(selected ?? last, last);
 		const step = event.shiftKey ? 10 : 1;
 		let next: number;
 		switch (event.key) {
@@ -195,7 +196,10 @@ export function StepLineChart<Point extends LinePoint>({
 		select(next);
 	};
 
-	const selectedPoint = selected === null ? undefined : points[selected];
+	const selectedPoint =
+		selected === null
+			? undefined
+			: points[Math.min(selected, points.length - 1)];
 
 	// 横軸の名前が重ならないよう、前の名前から十分に離れたものだけを残す
 	const minTickGap = 44 * fontScale;
@@ -226,7 +230,12 @@ export function StepLineChart<Point extends LinePoint>({
 					// biome-ignore lint/a11y/noNoninteractiveTabindex: 矢印キーで点を選んで値を確かめられるよう、図にフォーカスを置けるようにする
 					tabIndex={0}
 					onPointerMove={onPointerMove}
-					onPointerLeave={() => select(null)}
+					onPointerLeave={(event) => {
+						// キーボードで選んでいる間は、ポインタが外れても選択を保つ
+						if (document.activeElement !== event.currentTarget) {
+							select(null);
+						}
+					}}
 					onFocus={() => select(selected ?? points.length - 1)}
 					onBlur={() => select(null)}
 					onKeyDown={onKeyDown}

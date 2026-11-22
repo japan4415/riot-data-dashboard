@@ -1,6 +1,7 @@
 import type { Dataset, EpochMs, Match, QueueCategory } from "../model/types.ts";
 import { browserLocal, type ToLocal } from "./localTime.ts";
 import { inPeriod, type Period } from "./period.ts";
+import { extent, median } from "./stats.ts";
 
 /**
  * 試合の区分。この順に図表の色を割り当て、表もこの順に並べるので、並びを変えない。
@@ -109,13 +110,12 @@ export function matchSummary(matches: readonly Match[]): MatchSummary {
 			lengths.push(match.durationSec);
 		}
 	}
-	lengths.sort((a, b) => a - b);
 	return {
 		...winLoss(matches),
 		matches: count,
 		practice,
 		playSeconds,
-		medianSeconds: lengths[Math.floor(lengths.length / 2)] ?? null,
+		medianSeconds: median(lengths),
 	};
 }
 
@@ -221,11 +221,12 @@ export function matchBuckets(
 		for (let month = 1; month <= 12; month += 1) {
 			keys.push(month);
 		}
-	} else if (dated.length > 0) {
-		const years = dated.map((item) => item.year);
-		const last = Math.max(...years);
-		for (let year = Math.min(...years); year <= last; year += 1) {
-			keys.push(year);
+	} else {
+		const years = extent(dated.map((item) => item.year));
+		if (years) {
+			for (let year = years.min; year <= years.max; year += 1) {
+				keys.push(year);
+			}
 		}
 	}
 

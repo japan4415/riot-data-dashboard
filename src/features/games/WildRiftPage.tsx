@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { matchesOf, matchSummary } from "../../analysis/matches.ts";
+import { extent } from "../../analysis/stats.ts";
 import { transactionsInPeriod, transactionsOf } from "../../analysis/store.ts";
 import {
 	DIVISIONS_PER_TIER,
@@ -49,53 +50,57 @@ type RankChartPoint = RankPoint & { x: number; y: number };
 function RankCard({ matches }: { matches: readonly WildRiftMatch[] }) {
 	const { period, toLocal } = useDashboard();
 
-	const { points, unreadable, yDomain, yTicks, xTicks } = useMemo(() => {
-		const history = rankHistory(matches);
-		const points: RankChartPoint[] = history.points.map((point) => ({
-			...point,
-			x: point.index,
-			y: point.ordinal,
-		}));
+	const { points, unreadable, xDomain, yDomain, yTicks, xTicks } =
+		useMemo(() => {
+			const history = rankHistory(matches);
+			const points: RankChartPoint[] = history.points.map((point) => ({
+				...point,
+				x: point.index,
+				y: point.ordinal,
+			}));
 
-		// 縦軸は、記録があるティアの下端から上端までにする
-		const ordinals = points.map((point) => point.ordinal);
-		const bottom =
-			Math.floor(Math.min(...ordinals) / DIVISIONS_PER_TIER) *
-			DIVISIONS_PER_TIER;
-		const top =
-			(Math.floor(Math.max(...ordinals) / DIVISIONS_PER_TIER) + 1) *
-			DIVISIONS_PER_TIER;
-		const yTicks: AxisTick[] = [];
-		for (let value = bottom; value <= top; value += DIVISIONS_PER_TIER) {
-			yTicks.push({
-				value,
-				label: RANK_TIERS[value / DIVISIONS_PER_TIER] ?? "",
-			});
-		}
-
-		// 横軸は試合の順なので、年（1 年分では月）が変わる最初の試合に名前を付ける
-		const xTicks: AxisTick[] = [];
-		let previous: number | null = null;
-		for (const point of points) {
-			const local = toLocal(point.at);
-			const key = period.kind === "all" ? local.year : local.month;
-			if (key !== previous) {
-				previous = key;
-				xTicks.push({
-					value: point.index,
-					label: period.kind === "all" ? `${key}年` : `${key}月`,
+			// 縦軸は、記録があるティアの下端から上端までにする
+			const range = extent(points.map((point) => point.ordinal)) ?? {
+				min: 0,
+				max: 0,
+			};
+			const bottom =
+				Math.floor(range.min / DIVISIONS_PER_TIER) * DIVISIONS_PER_TIER;
+			const top =
+				(Math.floor(range.max / DIVISIONS_PER_TIER) + 1) * DIVISIONS_PER_TIER;
+			const yTicks: AxisTick[] = [];
+			for (let value = bottom; value <= top; value += DIVISIONS_PER_TIER) {
+				yTicks.push({
+					value,
+					label: RANK_TIERS[value / DIVISIONS_PER_TIER] ?? "",
 				});
 			}
-		}
 
-		return {
-			points,
-			unreadable: history.unreadable,
-			yDomain: [bottom, top] as const,
-			yTicks,
-			xTicks,
-		};
-	}, [matches, period, toLocal]);
+			// 横軸は試合の順なので、年（1 年分では月）が変わる最初の試合に名前を付ける
+			const xTicks: AxisTick[] = [];
+			let previous: number | null = null;
+			for (const point of points) {
+				const local = toLocal(point.at);
+				const key = period.kind === "all" ? local.year : local.month;
+				if (key !== previous) {
+					previous = key;
+					xTicks.push({
+						value: point.index,
+						label: period.kind === "all" ? `${key}年` : `${key}月`,
+					});
+				}
+			}
+
+			return {
+				points,
+				unreadable: history.unreadable,
+				// 1 試合だけのときも幅を持たせる
+				xDomain: [0, Math.max(1, points.length - 1)] as const,
+				yDomain: [bottom, top] as const,
+				yTicks,
+				xTicks,
+			};
+		}, [matches, period, toLocal]);
 
 	if (points.length === 0) {
 		return null;
@@ -121,7 +126,7 @@ function RankCard({ matches }: { matches: readonly WildRiftMatch[] }) {
 			chart={
 				<StepLineChart
 					points={points}
-					xDomain={[0, Math.max(1, points.length - 1)]}
+					xDomain={xDomain}
 					xTicks={xTicks}
 					yDomain={yDomain}
 					yTicks={yTicks}

@@ -6,6 +6,7 @@ import {
 	balanceSeries,
 	currencyFlows,
 	gifts,
+	giftsInPeriod,
 	purchasesByCategory,
 	storeSummary,
 	transactionsInPeriod,
@@ -137,6 +138,69 @@ describe("balanceSeries", () => {
 			balanceSeries(transactions, "RP", { kind: "year", year: 2023 }, jst),
 		).toEqual({ points: [], opening: 900 });
 	});
+
+	it("前の年の取引にその通貨の残高が無ければ、前の残高は null", () => {
+		expect(
+			balanceSeries(
+				[
+					transaction("2020-05-01T00:00:00Z", { balances: [be(100)] }),
+					transaction("2021-02-01T00:00:00Z", { balances: [rp(300)] }),
+				],
+				"RP",
+				{ kind: "year", year: 2021 },
+				jst,
+			),
+		).toEqual({
+			points: [{ at: at("2021-02-01T00:00:00Z"), amount: 300 }],
+			opening: null,
+		});
+	});
+
+	describe("同じ時刻に記録された取引", () => {
+		const row = (amount: number, delta: number) =>
+			transaction("2021-03-01T00:00:00Z", {
+				balances: [rp(amount)],
+				deltas: delta === 0 ? [] : [rp(delta)],
+			});
+		const before = transaction("2021-02-01T00:00:00Z", {
+			balances: [rp(1000)],
+		});
+		const last = (rows: ReturnType<typeof row>[]) =>
+			balanceSeries([before, ...rows], "RP", ALL_PERIOD, jst).points.at(-1)
+				?.amount;
+
+		it("元の並びが取引の順でなくても、増減のつながりから最後の残高を決める", () => {
+			// 1,000 → 25（購入）→ 1,405（RP の購入）の順に起きたが、逆順に記録されている
+			expect(last([row(1405, 1380), row(25, -975)])).toBe(1405);
+			expect(last([row(25, -975), row(1405, 1380)])).toBe(1405);
+		});
+
+		it("増減が無い行は、順番の手がかりにしない", () => {
+			// バンドルの中身の行は増減が無く、購入の前後どちらの残高も持ちうる
+			expect(last([row(25, -975), row(1000, 0)])).toBe(25);
+			expect(last([row(1000, 0), row(25, -975), row(25, 0)])).toBe(25);
+		});
+
+		it("買ってすぐ返金したときは、元の残高に戻る", () => {
+			expect(last([row(1000, 975), row(25, -975)])).toBe(1000);
+		});
+
+		it("直前の残高が分からなくても、つながりの終点を採る", () => {
+			const rows = [row(1405, 1380), row(25, -975)];
+			expect(
+				balanceSeries(rows, "RP", ALL_PERIOD, jst).points.at(-1)?.amount,
+			).toBe(1405);
+		});
+
+		it("つながりをたどれないときは、元の並びで最後の行の残高を使う", () => {
+			// 1,000 から始まる行が無く、2 行の間もつながらない
+			expect(last([row(500, -100), row(200, -50)])).toBe(200);
+		});
+
+		it("増減のある行が無ければ、元の並びで最後の行の残高を使う", () => {
+			expect(last([row(1000, 0), row(1000, 0)])).toBe(1000);
+		});
+	});
 });
 
 describe("purchasesByCategory / storeSummary", () => {
@@ -248,6 +312,43 @@ describe("gifts", () => {
 		]);
 		expect(result).toHaveLength(2);
 		expect(result.every((gift) => gift.deltas[0]?.amount === -250)).toBe(true);
+	});
+
+	it("品目 ID が無い行どうしは、組にしない", () => {
+		const result = gifts([
+			transaction("2024-01-01T00:00:00Z", {
+				rawKind: "PURCHASED_GIFT",
+				deltas: [rp(-975)],
+			}),
+			transaction("2024-01-01T00:00:01Z", { rawKind: "ITEM_TRANSFER_SENT" }),
+		]);
+		expect(result).toHaveLength(2);
+	});
+
+	it("年をまたいで記録された 2 行も、1 件の贈り物として数える", () => {
+		// 日本時間では、支払いが大みそかの 23:59:58、品目の移動が元日の 0:00:02
+		const transactions = [
+			transaction("2023-12-31T14:59:58Z", {
+				rawKind: "PURCHASED_GIFT",
+				rawId: "championsskin_1001",
+				deltas: [rp(-975)],
+			}),
+			transaction("2023-12-31T15:00:02Z", {
+				rawKind: "ITEM_TRANSFER_SENT",
+				rawId: "championsskin_1001",
+			}),
+		];
+		expect(
+			giftsInPeriod(transactions, { kind: "year", year: 2023 }, jst),
+		).toEqual([]);
+		const inNewYear = giftsInPeriod(
+			transactions,
+			{ kind: "year", year: 2024 },
+			jst,
+		);
+		expect(inNewYear).toHaveLength(1);
+		expect(inNewYear[0]?.deltas).toEqual([rp(-975)]);
+		expect(giftsInPeriod(transactions, ALL_PERIOD, jst)).toHaveLength(1);
 	});
 
 	it("RP の贈り物と、受け取った贈り物を区別する", () => {

@@ -143,7 +143,8 @@ describe("VALORANT の画面", () => {
 		expect(statValue("勝率")).toBe("50.0%");
 		expect(statNote("勝率")).toBe("1 勝 1 敗");
 		expect(statValue("プレイ時間")).toBe("1 時間");
-		expect(statValue("1 試合の長さ")).toBe("36 分");
+		// 20 分と 35.5 分の中央値
+		expect(statValue("1 試合の長さ")).toBe("28 分");
 	});
 
 	it("図表と一覧を、決まった順に並べる", async () => {

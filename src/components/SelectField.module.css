@@ -23,3 +23,10 @@
 	font-size: var(--text-small-size);
 	cursor: pointer;
 }
+
+/* 指で操作する端末では、押しやすい高さにする */
+@media (pointer: coarse) {
+	.select {
+		min-height: 2.75rem;
+	}
+}
