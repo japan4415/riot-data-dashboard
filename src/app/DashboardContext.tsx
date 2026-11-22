@@ -13,6 +13,7 @@ import { type GameScreen, gameScreens } from "../analysis/games.ts";
 import { browserLocal, type ToLocal } from "../analysis/localTime.ts";
 import { recordSpan, recordYears } from "../analysis/overview.ts";
 import { ALL_PERIOD, type Period } from "../analysis/period.ts";
+import { MaskModeProvider } from "../components/MaskContext.tsx";
 import type { ImportResult } from "../import/importArchive.ts";
 import type { Dataset, EpochMs } from "../model/types.ts";
 
@@ -30,6 +31,9 @@ interface DashboardValue {
 	/** すべての画面で共通の、表示する期間。 */
 	period: Period;
 	setPeriod: (period: Period) => void;
+	/** 伏せ字モードが入っているか。画面を切り替えても保つ。 */
+	maskMode: boolean;
+	setMaskMode: (masked: boolean) => void;
 	/** 時刻を利用者のタイムゾーンでの暦の値に直す関数。 */
 	toLocal: ToLocal;
 }
@@ -46,6 +50,7 @@ export function DashboardProvider({
 	children,
 }: DashboardProviderProps) {
 	const [period, setPeriod] = useState<Period>(ALL_PERIOD);
+	const [maskMode, setMaskMode] = useState(false);
 
 	// 読み込んだデータから求める値は、期間を変えても作り直さない
 	const derived = useMemo(() => {
@@ -62,13 +67,13 @@ export function DashboardProvider({
 	}, [result]);
 
 	const value = useMemo<DashboardValue>(
-		() => ({ ...derived, period, setPeriod }),
-		[derived, period],
+		() => ({ ...derived, period, setPeriod, maskMode, setMaskMode }),
+		[derived, period, maskMode],
 	);
 
 	return (
 		<DashboardContext.Provider value={value}>
-			{children}
+			<MaskModeProvider masked={maskMode}>{children}</MaskModeProvider>
 		</DashboardContext.Provider>
 	);
 }

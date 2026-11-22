@@ -30,6 +30,8 @@ interface StackedBarsProps {
 	buckets: readonly BarBucket[];
 	/** 値の単位。例: `日` */
 	unit: string;
+	/** 値の表し方。省くと、数値に単位を添える。金額のように単位の付け方が違うときに渡す。 */
+	formatValue?: (value: number) => string;
 	/** 図全体の説明。読み上げに使う。 */
 	label: string;
 }
@@ -58,6 +60,7 @@ export function StackedBars({
 	series,
 	buckets,
 	unit,
+	formatValue = (value) => `${formatNumber(value)} ${unit}`,
 	label,
 }: StackedBarsProps) {
 	const wrapperRef = useRef<HTMLDivElement>(null);
@@ -136,10 +139,7 @@ export function StackedBars({
 								value: bucket.values[seriesIndex] ?? 0,
 							}))
 							.filter(({ value }) => value > 0)
-							.map(
-								({ item, value }) =>
-									`${item.label} ${formatNumber(value)} ${unit}`,
-							)
+							.map(({ item, value }) => `${item.label} ${formatValue(value)}`)
 							.join("、");
 
 						let stacked = 0;
@@ -230,7 +230,7 @@ export function StackedBars({
 									key={item.id}
 									color={item.color}
 									label={item.label}
-									value={`${formatNumber(value)} ${unit}`}
+									value={formatValue(value)}
 								/>
 							))}
 						</>

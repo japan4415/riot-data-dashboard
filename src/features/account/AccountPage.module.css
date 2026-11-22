@@ -1,0 +1,175 @@
+.empty {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+}
+
+/* 登録情報は、名前と値の 2 列で並べる */
+.profile {
+	display: grid;
+	gap: var(--space-3);
+	margin: 0;
+}
+
+.profileRow {
+	display: grid;
+	grid-template-columns: minmax(8rem, 12rem) minmax(0, 1fr);
+	align-items: center;
+	gap: var(--space-1) var(--space-4);
+	min-height: 1.75rem;
+}
+
+.profileRow dt {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.profileRow dd {
+	min-width: 0;
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.tableFrame {
+	min-width: 0;
+	overflow-x: auto;
+	border: 1px solid var(--color-separator);
+	border-radius: var(--radius-m);
+}
+
+/* 問い合わせとチャットは、1 件ごとにやりとりを並べる。たたまずに最初から見せる */
+.threads {
+	display: grid;
+	gap: var(--space-5);
+}
+
+.thread {
+	display: grid;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.thread + .thread {
+	padding-top: var(--space-5);
+	border-top: 1px solid var(--color-separator);
+}
+
+.threadTitle {
+	font-size: var(--text-body-size);
+	font-weight: 600;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.meta {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.meta strong {
+	color: var(--color-text);
+	font-weight: 600;
+}
+
+/* 1 件の記録の項目を、名前と値の組で並べる。幅に応じて列の数を変える */
+.facts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+	gap: var(--space-3) var(--space-5);
+	margin: var(--space-2) 0 0;
+}
+
+.facts dt {
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.facts dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+
+.messages {
+	display: grid;
+	gap: var(--space-2);
+	margin-top: var(--space-2);
+}
+
+/* 1 つの発言。地の色を 1 段変えて、やりとりのまとまりを示す */
+.message {
+	display: grid;
+	gap: var(--space-1);
+	min-width: 0;
+	padding: var(--space-3) var(--space-4);
+	border-radius: var(--radius-m);
+	background: var(--color-bg);
+}
+
+.hiddenAddress {
+	color: var(--color-text-secondary);
+	letter-spacing: 0.08em;
+}
+
+/* 読み上げにだけ伝える文言 */
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.reveal {
+	min-height: 2rem;
+	padding: 0 var(--space-4);
+	border: 1px solid var(--color-separator-strong);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-small-size);
+	cursor: pointer;
+	transition: transform 100ms ease-out;
+}
+
+/* 押した瞬間に反応を返す */
+.reveal:active {
+	transform: scale(0.97);
+	background: var(--color-separator);
+}
+
+/* 幅が狭いときは、名前の下に値を置く */
+@media (max-width: 34rem) {
+	.profileRow {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* 指で操作する端末では、押しやすい高さにする */
+@media (pointer: coarse) {
+	.reveal {
+		min-height: 2.75rem;
+	}
+}
+
+@media (prefers-contrast: more) {
+	.message {
+		border: 1px solid var(--color-text);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.reveal {
+		transition: none;
+	}
+
+	.reveal:active {
+		transform: none;
+	}
+}

@@ -29,3 +29,15 @@
 		min-height: 2.5rem;
 	}
 }
+
+/* 幅が狭い画面では、アプリケーション名に幅を譲るため、選択欄だけを見せる。名前は読み上げには残す */
+@media (max-width: 30rem) {
+	.label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+}

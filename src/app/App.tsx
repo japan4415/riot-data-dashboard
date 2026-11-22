@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Link, Redirect, Route, Switch, useLocation } from "wouter";
 import type { GameScreen } from "../analysis/games.ts";
+import { AccountPage } from "../features/account/AccountPage.tsx";
 import { ActivityPage } from "../features/activity/ActivityPage.tsx";
 import { LolPage } from "../features/games/LolPage.tsx";
 import { LorPage } from "../features/games/LorPage.tsx";
@@ -17,10 +18,12 @@ import { WildRiftPage } from "../features/games/WildRiftPage.tsx";
 import { ImportPage } from "../features/import/ImportPage.tsx";
 import { OverviewPage } from "../features/overview/OverviewPage.tsx";
 import { ImportReportPage } from "../features/report/ImportReportPage.tsx";
+import { SpendingPage } from "../features/spending/SpendingPage.tsx";
 import type { ImportResult } from "../import/importArchive.ts";
 import { gameLabel } from "../labels/games.ts";
 import styles from "./App.module.css";
 import { DashboardProvider, useDashboard } from "./DashboardContext.tsx";
+import { MaskToggle } from "./MaskToggle.tsx";
 import { PeriodSelect } from "./PeriodSelect.tsx";
 
 const REPOSITORY_URL = "https://github.com/japan4415/riot-data-dashboard";
@@ -63,10 +66,19 @@ function screenGroups(games: readonly GameScreen[]): ScreenGroup[] {
 			})),
 		});
 	}
-	groups.push({
-		heading: "データ",
-		screens: [{ path: "/files", label: "読み込み結果" }],
-	});
+	groups.push(
+		{
+			heading: "記録",
+			screens: [
+				{ path: "/spending", label: "課金" },
+				{ path: "/account", label: "アカウント" },
+			],
+		},
+		{
+			heading: "データ",
+			screens: [{ path: "/files", label: "読み込み結果" }],
+		},
+	);
 	return groups;
 }
 
@@ -183,6 +195,8 @@ function Screens({ result }: { result: ImportResult }) {
 					component={GAME_PAGES[game]}
 				/>
 			))}
+			<Route path="/spending" component={SpendingPage} />
+			<Route path="/account" component={AccountPage} />
 			<Route path="/files">
 				<ImportReportPage result={result} />
 			</Route>
@@ -215,7 +229,15 @@ export function App() {
 
 	return (
 		<DashboardProvider result={result}>
-			<Frame wide barAction={<PeriodSelect />}>
+			<Frame
+				wide
+				barAction={
+					<div className={styles.barControls}>
+						<MaskToggle />
+						<PeriodSelect />
+					</div>
+				}
+			>
 				<div className={styles.dashboard}>
 					<Navigation
 						onDiscard={() => {
