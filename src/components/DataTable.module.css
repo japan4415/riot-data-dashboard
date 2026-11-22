@@ -1,0 +1,50 @@
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--text-small-size);
+	line-height: 1.5;
+}
+
+/* 表の題は読み上げ用。画面では枠の見出しが同じ役目を果たす */
+.caption {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.table th,
+.table td {
+	padding: var(--space-2) var(--space-4);
+	text-align: start;
+	white-space: nowrap;
+}
+
+.table thead th {
+	position: sticky;
+	top: 0;
+	background: var(--color-surface);
+	box-shadow: inset 0 -1px 0 var(--color-separator);
+	color: var(--color-text-secondary);
+	font-weight: 600;
+	letter-spacing: var(--text-small-tracking);
+}
+
+.table tbody th {
+	font-weight: 500;
+}
+
+.table tbody tr + tr {
+	border-top: 1px solid var(--color-separator);
+}
+
+.table .numeric {
+	text-align: end;
+	font-variant-numeric: tabular-nums;
+}
+
+.empty {
+	color: var(--color-text-secondary);
+}

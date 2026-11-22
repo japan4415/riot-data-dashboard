@@ -1,0 +1,85 @@
+.groups {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+	gap: var(--space-4);
+}
+
+.group {
+	display: grid;
+	align-content: start;
+	gap: var(--space-3);
+	min-width: 0;
+	padding: var(--space-5);
+	border-radius: var(--radius-l);
+	background: var(--color-surface);
+}
+
+.groupTitle {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	font-size: var(--text-title-size);
+	font-weight: 600;
+	line-height: var(--text-title-leading);
+	letter-spacing: var(--text-title-tracking);
+}
+
+/* 図表と同じ色の目印。文字は色で染めない */
+.groupKey {
+	flex: none;
+	width: 0.625rem;
+	height: 0.625rem;
+	border-radius: 50%;
+}
+
+.groupFacts {
+	display: grid;
+	gap: var(--space-2);
+	margin: 0;
+	font-size: var(--text-small-size);
+	line-height: 1.5;
+}
+
+.groupFacts > div {
+	display: grid;
+	grid-template-columns: 6.5em minmax(0, 1fr);
+	gap: var(--space-3);
+}
+
+.groupFacts dt {
+	color: var(--color-text-secondary);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.groupFacts dd {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.nowrap {
+	white-space: nowrap;
+}
+
+.groupNote {
+	text-wrap: pretty;
+	word-break: auto-phrase;
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	letter-spacing: var(--text-small-tracking);
+}
+
+.more {
+	font-size: var(--text-small-size);
+	white-space: nowrap;
+}
+
+.more:active {
+	opacity: 0.6;
+}
+
+@media (prefers-contrast: more) {
+	.group {
+		border: 1px solid var(--color-text);
+	}
+}

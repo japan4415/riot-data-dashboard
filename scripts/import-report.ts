@@ -6,6 +6,16 @@
  *   node scripts/import-report.ts <zip のパス>
  */
 import { readFileSync } from "node:fs";
+import {
+	activeDaysByGroup,
+	buildActivityIndex,
+	busiestSlot,
+	daysInPeriod,
+	hourWeekMatrix,
+	longestStreak,
+} from "../src/analysis/activity.ts";
+import { overviewStats } from "../src/analysis/overview.ts";
+import { ALL_PERIOD } from "../src/analysis/period.ts";
 import { importArchive } from "../src/import/importArchive.ts";
 
 const zipPath = process.argv[2];
@@ -47,3 +57,21 @@ console.log(
 	),
 );
 console.log(`読み込み時間: ${elapsed}ms`);
+
+// 画面に出す集計が、実データでも計算できることを確かめる。値は合計だけを表示する
+const activity = buildActivityIndex(dataset);
+const days = daysInPeriod(activity, ALL_PERIOD);
+const stats = overviewStats(dataset, activity, ALL_PERIOD);
+console.log("\n集計（全期間）:", {
+	years:
+		activity.years.length > 0
+			? `${activity.years[0]}〜${activity.years.at(-1)}`
+			: null,
+	activeDays: days.length,
+	activeDaysByGroup: activeDaysByGroup(days),
+	longestStreak: longestStreak(days)?.length ?? 0,
+	busiestSlot: busiestSlot(hourWeekMatrix(activity, ALL_PERIOD)),
+	matches: stats.matches,
+	playHours: Math.round(stats.playSeconds / 3600),
+	currencies: stats.spending.map((total) => total.currency),
+});

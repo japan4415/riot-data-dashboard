@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { PageHeading } from "../../components/PageHeading.tsx";
+import { StatRow, StatTile } from "../../components/StatTile.tsx";
 import type {
 	ImportResult,
 	ReportEntry,
@@ -7,6 +8,7 @@ import type {
 import { FILE_KINDS } from "../../import/registry.ts";
 import { GAME_ORDER, gameLabel } from "../../labels/games.ts";
 import type { GameId } from "../../model/types.ts";
+import pageStyles from "../Page.module.css";
 import styles from "./ImportReportPage.module.css";
 
 const STATUS_LABELS: Readonly<Record<ReportStatus, string>> = {
@@ -33,61 +35,34 @@ function groupByGame(entries: readonly ReportEntry[]): Group[] {
 
 interface ImportReportPageProps {
 	result: ImportResult;
-	onDiscard: () => void;
 }
 
-export function ImportReportPage({ result, onDiscard }: ImportReportPageProps) {
+/** 読み込み結果の画面。zip の中の何を読めて、何を読めなかったかを示す。 */
+export function ImportReportPage({ result }: ImportReportPageProps) {
 	const { entries, totals } = result.report;
-	const headingRef = useRef<HTMLHeadingElement>(null);
-
-	// 画面が切り替わったことを伝えるため、見出しへフォーカスを移す
-	useEffect(() => {
-		headingRef.current?.focus();
-		window.scrollTo(0, 0);
-	}, []);
-
-	const summary = [
-		{ label: "ファイル", value: totals.files },
-		{ label: "読み込んだ記録", value: totals.records },
-		{ label: "飛ばした記録", value: totals.skipped },
-		{ label: "読めなかったファイル", value: totals.failedFiles },
-	];
 
 	return (
-		<>
-			<section className={styles.intro} aria-labelledby="report-heading">
-				<h1
-					id="report-heading"
-					ref={headingRef}
-					tabIndex={-1}
-					className={styles.heading}
-				>
-					読み込み結果
-				</h1>
-				<p className={styles.lead}>
-					zip
-					を読み込みました。集計と図表の画面は準備中です。いまは、読み込めた内容の一覧だけを表示します。
-				</p>
+		<div className={pageStyles.page}>
+			<PageHeading title="読み込み結果">
+				zip
+				の中のファイルを、種類ごとにまとめています。期間の選択は、この画面には適用されません。
+			</PageHeading>
 
-				<dl className={styles.summary}>
-					{summary.map((item) => (
-						<div key={item.label} className={styles.summaryItem}>
-							<dt className={styles.summaryLabel}>{item.label}</dt>
-							<dd className={styles.summaryValue}>
-								{numberFormat.format(item.value)}
-							</dd>
-						</div>
-					))}
-				</dl>
-
-				<button
-					type="button"
-					className={styles.discardButton}
-					onClick={onDiscard}
-				>
-					データを破棄して最初に戻る
-				</button>
-			</section>
+			<StatRow>
+				<StatTile label="ファイル" value={numberFormat.format(totals.files)} />
+				<StatTile
+					label="読み込んだ記録"
+					value={numberFormat.format(totals.records)}
+				/>
+				<StatTile
+					label="飛ばした記録"
+					value={numberFormat.format(totals.skipped)}
+				/>
+				<StatTile
+					label="読めなかったファイル"
+					value={numberFormat.format(totals.failedFiles)}
+				/>
+			</StatRow>
 
 			{groupByGame(entries).map((group) => {
 				const headingId = `report-group-${group.game ?? "account"}`;
@@ -176,6 +151,6 @@ export function ImportReportPage({ result, onDiscard }: ImportReportPageProps) {
 					</div>
 				</dl>
 			</section>
-		</>
+		</div>
 	);
 }

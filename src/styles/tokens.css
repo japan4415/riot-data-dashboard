@@ -43,6 +43,28 @@
 	--color-error-bg: light-dark(#fdecea, #3b1513);
 	--color-error-text: light-dark(#8c1d18, #ffb4ab);
 	--color-success-text: light-dark(#1b6b3a, #7ddc9f);
+	--color-tooltip-bg: light-dark(#ffffff, #2c2c2e);
+	--color-control-bg: light-dark(#e9e9ee, #2c2c2e);
+	--color-control-selected: light-dark(#ffffff, #636366);
+
+	/*
+	 * 図表の色。検証済みの配色から、この画面の地の色（白と #1c1c1e）で確かめたもの。
+	 * 系列の色は活動の区分に固定で割り当て、並び順も変えない（隣り合う色の見分けやすさを保つため）。
+	 */
+	--chart-series-1: light-dark(#2a78d6, #3987e5);
+	--chart-series-2: light-dark(#eb6834, #d95926);
+	--chart-series-3: light-dark(#1baf7a, #199e70);
+	--chart-series-4: light-dark(#eda100, #c98500);
+	--chart-series-5: light-dark(#e87ba4, #d55181);
+	/* 量を表す濃淡。0 は「記録なし」。ダークでは多いほど明るくする */
+	--chart-level-0: light-dark(#ebebf0, #2c2c2e);
+	--chart-level-1: light-dark(#86b6ef, #184f95);
+	--chart-level-2: light-dark(#5598e7, #256abf);
+	--chart-level-3: light-dark(#256abf, #3987e5);
+	--chart-level-4: light-dark(#104281, #86b6ef);
+	--chart-grid: light-dark(#e6e6eb, #2c2c2e);
+	--chart-axis: light-dark(#c7c7cc, #48484a);
+	--chart-hover: light-dark(rgb(0 0 0 / 0.05), rgb(255 255 255 / 0.07));
 
 	/* 余白 */
 	--space-1: 0.25rem;
@@ -61,6 +83,9 @@
 
 	/* 配置 */
 	--content-width: 60rem;
+	/* 読み込み後の画面は、メニューと図表を並べるので広く取る */
+	--dashboard-width: 76rem;
+	--nav-width: 12.5rem;
 	--page-gutter: clamp(1rem, 4vw, 2rem);
 	--bar-height: 3rem;
 }

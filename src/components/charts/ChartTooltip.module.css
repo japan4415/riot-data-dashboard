@@ -1,0 +1,51 @@
+.tooltip {
+	position: absolute;
+	z-index: 5;
+	display: grid;
+	gap: var(--space-1);
+	min-width: 9rem;
+	max-width: 16rem;
+	padding: var(--space-2) var(--space-3);
+	border: 1px solid var(--color-separator);
+	border-radius: var(--radius-s);
+	background: var(--color-tooltip-bg);
+	box-shadow: 0 6px 20px rgb(0 0 0 / 0.16);
+	color: var(--color-text);
+	font-size: var(--text-small-size);
+	line-height: 1.5;
+	pointer-events: none;
+	transform: translate(-50%, calc(-100% - 0.75rem));
+	white-space: nowrap;
+}
+
+.title {
+	color: var(--color-text-secondary);
+}
+
+.row {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+/* 系列の目印は、塗りつぶした箱ではなく短い線にする */
+.key {
+	width: 0.75rem;
+	height: 0.1875rem;
+	border-radius: 999px;
+}
+
+.rowLabel {
+	color: var(--color-text-secondary);
+}
+
+.rowValue {
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	text-align: end;
+}
+
+.row:not(:has(.key)) {
+	grid-template-columns: 1fr auto;
+}

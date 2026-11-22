@@ -1,0 +1,26 @@
+.container {
+	position: relative;
+	min-width: 0;
+}
+
+.scroll {
+	overflow-x: auto;
+}
+
+.svg {
+	display: block;
+}
+
+.label {
+	fill: var(--color-text-secondary);
+	font-size: 0.6875rem;
+}
+
+.cell {
+	stroke: transparent;
+	stroke-width: 1.5px;
+}
+
+.cell:hover {
+	stroke: var(--color-text);
+}
