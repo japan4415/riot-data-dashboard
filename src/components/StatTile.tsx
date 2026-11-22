@@ -4,16 +4,26 @@ import styles from "./StatTile.module.css";
 interface StatTileProps {
 	label: string;
 	value: ReactNode;
-	/** 値の補足。単位や、何を数えたかの注記。 */
+	/** 値の単位。数値より小さく添える。 */
+	unit?: string;
+	/** 値の補足。何を数えたかの注記など。 */
 	note?: ReactNode;
 }
 
 /** 主要な数値 1 つを見せる枠。`dl` の中に並べて使う。 */
-export function StatTile({ label, value, note }: StatTileProps) {
+export function StatTile({ label, value, unit, note }: StatTileProps) {
 	return (
 		<div className={styles.tile}>
 			<dt className={styles.label}>{label}</dt>
-			<dd className={styles.value}>{value}</dd>
+			<dd className={styles.value}>
+				{value}
+				{unit && (
+					<>
+						{" "}
+						<span className={styles.unit}>{unit}</span>
+					</>
+				)}
+			</dd>
 			{note && <dd className={styles.note}>{note}</dd>}
 		</div>
 	);

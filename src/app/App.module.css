@@ -113,6 +113,26 @@
 	gap: var(--space-5);
 }
 
+/* 画面が増えたので、まとまりごとに間を空けて見出しを付ける */
+.navGroups {
+	display: grid;
+	gap: var(--space-4);
+}
+
+.navGroup {
+	display: grid;
+	gap: var(--space-1);
+}
+
+.navHeading {
+	padding-inline: var(--space-3);
+	color: var(--color-text-secondary);
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: var(--text-small-leading);
+	letter-spacing: 0.04em;
+}
+
 .navList {
 	display: grid;
 	gap: var(--space-1);
@@ -173,15 +193,53 @@
 
 	.nav {
 		position: static;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: center;
-		gap: var(--space-3);
+		gap: var(--space-2);
+	}
+
+	/*
+	 * 横に 1 列で並べ、入りきらない分は横にスクロールする。見出しは出さない。
+	 * 画面の端まで広げ、右端をぼかして、続きがあることを示す。
+	 */
+	.navGroups {
+		display: flex;
+		gap: var(--space-1);
+		min-width: 0;
+		margin-inline: calc(var(--page-gutter) * -1);
+		padding-inline: var(--page-gutter) calc(var(--page-gutter) + var(--space-5));
+		overflow-x: auto;
+		scrollbar-width: none;
+		-webkit-mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 var(--page-gutter),
+			#000 calc(100% - var(--space-7)),
+			transparent
+		);
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			#000 var(--page-gutter),
+			#000 calc(100% - var(--space-7)),
+			transparent
+		);
+	}
+
+	.discard {
+		justify-self: end;
+	}
+
+	.navGroup {
+		display: contents;
+	}
+
+	.navHeading {
+		display: none;
 	}
 
 	.navList {
 		display: flex;
+		flex: none;
 		gap: var(--space-1);
-		overflow-x: auto;
 	}
 
 	.navLink {

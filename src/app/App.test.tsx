@@ -12,41 +12,18 @@ import {
 	syntheticExportFiles,
 } from "../../tests/fixtures/syntheticExport.ts";
 import { App } from "./App.tsx";
+import {
+	choose,
+	importSynthetic,
+	openScreen,
+	statValue,
+	zipFile,
+} from "./testing.tsx";
 
 afterEach(() => {
 	cleanup();
 	window.history.replaceState(null, "", "/");
 });
-
-function zipFile(bytes: Uint8Array, name = "export.zip"): File {
-	return new File([bytes as BlobPart], name, { type: "application/zip" });
-}
-
-function choose(file: File) {
-	fireEvent.change(screen.getByLabelText("zip ファイル"), {
-		target: { files: [file] },
-	});
-}
-
-/** 合成したデータを読み込み、概要の画面が出るまで待つ。 */
-async function importSynthetic() {
-	render(<App />);
-	choose(zipFile(buildSyntheticZip()));
-	return screen.findByRole("heading", { level: 1, name: "概要" });
-}
-
-function openScreen(name: string) {
-	const menu = screen.getByRole("navigation", { name: "画面" });
-	fireEvent.click(within(menu).getByRole("link", { name }));
-}
-
-/** 数値の枠から、見出しに対応する値を読む。 */
-function statValue(label: string): string | null {
-	const term = screen
-		.getAllByRole("term")
-		.find((element) => element.textContent === label);
-	return term?.nextElementSibling?.textContent ?? null;
-}
 
 describe("App: 読み込み前", () => {
 	it("アプリケーション名と最初の見出しを表示する", () => {

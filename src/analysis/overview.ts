@@ -1,4 +1,4 @@
-import type { Dataset, EpochMs, Match } from "../model/types.ts";
+import type { Dataset, EpochMs } from "../model/types.ts";
 import {
 	ACTIVITY_GROUPS,
 	type ActivityGroup,
@@ -7,6 +7,7 @@ import {
 	daysInPeriod,
 } from "./activity.ts";
 import { browserLocal, type DayKey, type ToLocal } from "./localTime.ts";
+import { matchInPeriod } from "./matches.ts";
 import { inPeriod, type Period } from "./period.ts";
 
 export interface Span {
@@ -60,18 +61,6 @@ export function recordYears(
 		years.push(year);
 	}
 	return years;
-}
-
-function matchInPeriod(
-	match: Match,
-	period: Period,
-	toLocal: ToLocal,
-): boolean {
-	const at = match.startedAt ?? match.endedAt;
-	// 時刻が分からない試合は、全期間のときだけ数える
-	return at === null
-		? period.kind === "all"
-		: inPeriod(period, toLocal(at).year);
 }
 
 export interface MoneyTotal {
