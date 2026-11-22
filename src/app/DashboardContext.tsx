@@ -31,7 +31,7 @@ interface DashboardValue {
 	/** すべての画面で共通の、表示する期間。 */
 	period: Period;
 	setPeriod: (period: Period) => void;
-	/** 伏せ字モードが入っているか。画面を切り替えても保つ。 */
+	/** 伏せ字モードが入っているか。画面を切り替えても、データを読み込み直しても保つ。 */
 	maskMode: boolean;
 	setMaskMode: (masked: boolean) => void;
 	/** 時刻を利用者のタイムゾーンでの暦の値に直す関数。 */
@@ -42,15 +42,21 @@ const DashboardContext = createContext<DashboardValue | null>(null);
 
 interface DashboardProviderProps {
 	result: ImportResult;
+	/**
+	 * 伏せ字モード。データを破棄して読み込み直しても切れないよう、状態は呼び出し側で持つ。
+	 */
+	maskMode: boolean;
+	onMaskModeChange: (masked: boolean) => void;
 	children: ReactNode;
 }
 
 export function DashboardProvider({
 	result,
+	maskMode,
+	onMaskModeChange,
 	children,
 }: DashboardProviderProps) {
 	const [period, setPeriod] = useState<Period>(ALL_PERIOD);
-	const [maskMode, setMaskMode] = useState(false);
 
 	// 読み込んだデータから求める値は、期間を変えても作り直さない
 	const derived = useMemo(() => {
@@ -67,8 +73,14 @@ export function DashboardProvider({
 	}, [result]);
 
 	const value = useMemo<DashboardValue>(
-		() => ({ ...derived, period, setPeriod, maskMode, setMaskMode }),
-		[derived, period, maskMode],
+		() => ({
+			...derived,
+			period,
+			setPeriod,
+			maskMode,
+			setMaskMode: onMaskModeChange,
+		}),
+		[derived, period, maskMode, onMaskModeChange],
 	);
 
 	return (

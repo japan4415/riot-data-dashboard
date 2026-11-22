@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { syntheticExportFiles } from "../../tests/fixtures/syntheticExport.ts";
 import {
+	buildSyntheticZip,
+	syntheticExportFiles,
+} from "../../tests/fixtures/syntheticExport.ts";
+import {
+	choose,
 	importSynthetic,
 	menu,
 	openScreen,
@@ -10,6 +14,7 @@ import {
 	statNote,
 	statValue,
 	tableRows,
+	zipFile,
 } from "./testing.tsx";
 
 afterEach(() => {
@@ -46,6 +51,19 @@ function profileValue(label: string): HTMLElement {
 function toggleMask() {
 	fireEvent.click(screen.getByRole("button", { name: "伏せ字" }));
 }
+
+/**
+ * 画面の要素のどこにも（文字にも、属性にも）、その文字列が無いことを確かめる。
+ * 伏せている値は、見た目を隠すのではなく、要素そのものに入れない決まりである。
+ */
+function expectAbsent(...secrets: string[]) {
+	const html = document.body.innerHTML;
+	for (const secret of secrets) {
+		expect(html).not.toContain(secret);
+	}
+}
+
+const LOGIN_PATH = "riotAccount/atlas_login_event_uc.json";
 
 const PAYMENT_FILES = Object.keys(syntheticExportFiles()).filter((path) =>
 	/payment|rp_purchase/.test(path),
@@ -181,6 +199,35 @@ describe("課金の画面", () => {
 		);
 	});
 
+	it("決済の取引番号と IP アドレスは、どこにも出さない", async () => {
+		await importSynthetic();
+		openScreen("課金");
+
+		expectAbsent(
+			// 取引 ID、決済側の取引番号、購入 ID
+			"NA1-00000000",
+			"T0001",
+			"AB1CDE2FGHIJ",
+			// IP アドレス
+			"203.0.113",
+		);
+	});
+
+	it("絞り込んでいたゲームの支払いが無い年を挟むと、絞り込みは外れたままになる", async () => {
+		await importSynthetic();
+		openScreen("課金");
+		fireEvent.change(within(card("支払いの一覧")).getByLabelText("ゲーム"), {
+			target: { value: "valorant" },
+		});
+		expect(tableRows(card("支払いの一覧"))).toHaveLength(1);
+
+		// 2021 年は LoL の支払いだけ
+		choosePeriod("2021");
+		choosePeriod("all");
+
+		expect(tableRows(card("支払いの一覧"))).toHaveLength(4);
+	});
+
 	it("支払いが無い年では、その旨を表示する", async () => {
 		await importSynthetic();
 		openScreen("課金");
@@ -229,8 +276,7 @@ describe("アカウントの画面", () => {
 			expect(profileValue(label).textContent).toContain("伏せ字にしています");
 		}
 		// 伏せている間は、値そのものを画面の中に置かない
-		expect(document.body.textContent).not.toContain("player@example.com");
-		expect(document.body.textContent).not.toContain("2000年1月2日");
+		expectAbsent("player@example.com", "2000年1月2日", "2000-01-02", "+81");
 	});
 
 	it("押すと表示し、もう一度押すと隠す", async () => {
@@ -255,6 +301,19 @@ describe("アカウントの画面", () => {
 
 		fireEvent.click(screen.getByRole("button", { name: "生年月日を表示" }));
 		expect(profileValue("生年月日").textContent).toContain("2000年1月2日");
+	});
+
+	it("表示した値は、別の画面へ移って戻ると伏せ直されている", async () => {
+		await importSynthetic();
+		openScreen("アカウント");
+		fireEvent.click(
+			screen.getByRole("button", { name: "メールアドレスを表示" }),
+		);
+
+		openScreen("概要");
+		openScreen("アカウント");
+
+		expectAbsent("player@example.com");
 	});
 
 	it("変更履歴を新しい順に並べ、出来事の名前に元の値を添える", async () => {
@@ -353,7 +412,7 @@ describe("アカウントの画面", () => {
 		openScreen("アカウント");
 
 		const list = card("IP アドレスの一覧");
-		expect(list.textContent).not.toContain("203.0.113");
+		expectAbsent("203.0.113", "2001:db8");
 		const rows = tableRows(list);
 		expect(rows).toHaveLength(3);
 		// 順位、回数、場面ごとの回数は、伏せていても見える
@@ -374,6 +433,49 @@ describe("アカウントの画面", () => {
 			within(list).getByRole("button", { name: "アドレスを隠す" }),
 		);
 		expect(list.textContent).not.toContain("203.0.113");
+	});
+
+	it("ページを送っても表示は保ち、伏せ字モードを入れるとどのページでも伏せる", async () => {
+		await importSynthetic({
+			extra: {
+				[LOGIN_PATH]: Array.from({ length: 30 }, (_, index) => ({
+					event_time_utc: `2024-03-${String(index + 1).padStart(2, "0")} 09:00:00`,
+					event_type: "Login",
+					ip_address: `198.51.100.${index + 1}`,
+					product: "League/TFT PC",
+				})),
+			},
+		});
+		openScreen("アカウント");
+		const list = card("IP アドレスの一覧");
+		expect(list.textContent).toContain("1〜25 件目（全 32 件）");
+
+		fireEvent.click(
+			within(list).getByRole("button", { name: "アドレスを表示" }),
+		);
+		fireEvent.click(within(list).getByRole("button", { name: "次のページ" }));
+
+		// アドレスを表示しても、ページは先頭に戻らない
+		expect(list.textContent).toContain("26〜32 件目（全 32 件）");
+		expect(list.textContent).toContain("198.51.100.");
+
+		toggleMask();
+		expectAbsent("198.51.100", "203.0.113");
+		expect(list.textContent).toContain("26〜32 件目（全 32 件）");
+	});
+
+	it("期間を変えると、表示していた IP アドレスを伏せ直す", async () => {
+		await importSynthetic();
+		openScreen("アカウント");
+		fireEvent.click(screen.getByRole("button", { name: "アドレスを表示" }));
+
+		choosePeriod("2021");
+
+		expectAbsent("203.0.113");
+		expect(tableRows(card("IP アドレスの一覧"))).toHaveLength(1);
+		expect(
+			screen.getByRole("button", { name: "アドレスを表示" }),
+		).toBeDefined();
 	});
 
 	it("年を選ぶと、日時のある記録をその年の分に絞る。通報の件数と登録情報は変わらない", async () => {
@@ -408,17 +510,16 @@ describe("伏せ字モード", () => {
 				.getByRole("button", { name: "伏せ字" })
 				.getAttribute("aria-pressed"),
 		).toBe("true");
-		const text = document.body.textContent ?? "";
-		for (const secret of [
+		expectAbsent(
 			"Tester#JP1",
-			"tester",
+			"Tester",
 			"ログインについて",
 			"ログインできません",
 			"確認しました",
 			"gl hf",
-		]) {
-			expect(text).not.toContain(secret);
-		}
+			"player@example.com",
+			"203.0.113",
+		);
 		expect(profileValue("Riot ID").textContent).toContain("伏せ字にしています");
 		// 個人を特定しない項目は、そのまま見せる
 		expect(profileValue("LoL のプラットフォーム").textContent).toBe("JP1");
@@ -462,6 +563,117 @@ describe("伏せ字モード", () => {
 		).toBeDefined();
 		expect(
 			screen.getByRole("button", { name: "アドレスを表示" }),
+		).toBeDefined();
+	});
+
+	it("データを破棄して読み込み直しても、入れたままにする", async () => {
+		await importSynthetic();
+		toggleMask();
+
+		fireEvent.click(screen.getByRole("button", { name: "データを破棄" }));
+		choose(zipFile(buildSyntheticZip()));
+		await screen.findByRole("heading", { level: 1, name: "概要" });
+
+		expect(
+			screen
+				.getByRole("button", { name: "伏せ字" })
+				.getAttribute("aria-pressed"),
+		).toBe("true");
+		openScreen("アカウント");
+		expectAbsent("Tester#JP1", "ログインについて", "gl hf");
+	});
+
+	it("対応が分からない値（宛先、書き手、補足）は、元の値が出るので伏せる", async () => {
+		const files = syntheticExportFiles();
+		const chatPath = "leagueoflegends/chat_logs_v2_uc/successes/100000001.json";
+		const chat = structuredClone(files[chatPath]) as {
+			chat_logs: { in_game: Array<{ sent_to: string }> };
+		};
+		// 特定の相手あての発言。宛先に相手の Riot ID が入っている場合を想定する
+		const [first] = chat.chat_logs.in_game;
+		if (first) {
+			first.sent_to = "Friend#JP9";
+		}
+		const tickets = structuredClone(
+			files["zendesk/zendesk_tickets.json"],
+		) as Record<string, { comments: Array<{ author: string }> }>;
+		const [comment] = tickets["10000001"]?.comments ?? [];
+		if (comment) {
+			comment.author = "Tanaka Taro";
+		}
+		await importSynthetic({
+			extra: {
+				[chatPath]: chat,
+				"zendesk/zendesk_tickets.json": tickets,
+				"riotAccount/account_audit_events_v2_uc.json": [
+					{
+						event_type: "USER_FIELD_CHANGED",
+						description: "new-address@example.com",
+						event_date: "2021-02-03 04:05:06",
+					},
+					{
+						event_type: "EMAIL",
+						description: "delivered",
+						event_date: "2021-02-04 04:05:06",
+					},
+				],
+			},
+		});
+		openScreen("アカウント");
+
+		// ふだんは、元の値のまま表示する
+		expect(card("チャットログ").textContent).toContain("Friend#JP9あて");
+		expect(card("問い合わせ").textContent).toContain("Tanaka Taro");
+		expect(card("アカウントの変更履歴").textContent).toContain(
+			"new-address@example.com",
+		);
+
+		toggleMask();
+
+		expectAbsent("Friend#JP9", "Tanaka Taro", "new-address@example.com");
+		// 短い語だけの補足と、対応が分かっている値は、そのまま見せる
+		expect(card("アカウントの変更履歴").textContent).toContain("delivered");
+		expect(card("問い合わせ").textContent).toContain("サポート担当（Agent）");
+	});
+
+	it("概要、ゲーム、課金の画面には、もともと個人を特定する値を出さない", async () => {
+		await importSynthetic();
+
+		for (const name of [
+			"概要",
+			"活動",
+			"League of Legends",
+			"VALORANT",
+			"課金",
+		]) {
+			openScreen(name);
+			expectAbsent("Tester#JP1", "player@example.com", "203.0.113", "2001:db8");
+		}
+	});
+
+	it("読み込み結果では、対応していないファイルのパスを伏せる", async () => {
+		// 展開したフォルダを圧縮し直した zip では、既知のフォルダの外にあるファイルのパスに、
+		// 包んでいるフォルダの名前（Riot ID を含むことがある）が残る
+		await importSynthetic({
+			wrapper: "Tester-JP1",
+			extra: { "extra/unknown_file.json": [] },
+		});
+		openScreen("読み込み結果");
+		expect(document.body.textContent).toContain(
+			"tester-jp1/extra/unknown_file.json",
+		);
+
+		toggleMask();
+
+		expectAbsent("tester-jp1");
+		// 対応しているファイルの行は、そのまま見せる
+		expect(
+			within(screen.getByRole("region", { name: "VALORANT" })).getByRole(
+				"row",
+				{
+					name: /試合履歴/,
+				},
+			),
 		).toBeDefined();
 	});
 

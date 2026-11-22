@@ -240,8 +240,12 @@ function PaymentListCard({ payments }: { payments: readonly Payment[] }) {
 			byGame: spendingByGame(all, GAMES),
 		};
 	}, [payments]);
-	// 期間を変えて、選んでいたゲームの支払いが無くなったら、絞り込みを外す
+	// 期間を変えて、選んでいたゲームの支払いが無くなったら、絞り込みを外す。
+	// 選択そのものも外し、あとでそのゲームの支払いがある期間に戻っても、勝手に絞り込まない
 	const active = filter !== "all" && games.includes(filter) ? filter : "all";
+	if (active !== filter) {
+		setFilter("all");
+	}
 	const rows = useMemo(
 		() => (active === "all" ? all : all.filter((row) => row.game === active)),
 		[all, active],

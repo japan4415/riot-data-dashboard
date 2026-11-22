@@ -54,6 +54,25 @@ function formatBirthday(value: string): string {
 	return `${year}年${month}月${day}日`;
 }
 
+interface KnownOrMaskedProps {
+	/** 元データの値。 */
+	raw: string | null;
+	/** 画面に出す文言。対応が分からない値では、元の値と同じになる。 */
+	label: string;
+}
+
+/**
+ * 対応が分かっている値は、言い換えた文言をそのまま出す。対応が分からない値は、
+ * 元の値がそのまま出る（相手の Riot ID などが入りうる）ので、伏せ字モードで伏せる。
+ */
+function KnownOrMasked({ raw, label }: KnownOrMaskedProps) {
+	return raw !== null && label === raw ? (
+		<MaskedText>{label}</MaskedText>
+	) : (
+		label
+	);
+}
+
 function time(at: EpochMs | null, format: (at: EpochMs) => string): string {
 	return at === null ? "日時の記録なし" : format(at);
 }
@@ -125,6 +144,27 @@ function ProfileCard() {
 	);
 }
 
+/** 項目名や状態を表す短い語。英字で始まり、英数字、下線、空白だけからなる。 */
+const PLAIN_WORD = /^[A-Za-z][A-Za-z0-9_ ]{0,39}$/;
+
+/**
+ * 変更履歴の補足。
+ *
+ * 手元の開示データでは `delivered` や `username` のような短い語だけが入っていた。
+ * ただし自由な文字列を入れられる項目なので、短い語でない値（メールアドレスなどが
+ * 入っている場合）は、伏せ字モードで伏せる。
+ */
+function EventNote({ description }: { description: string | null }) {
+	if (description === null) {
+		return "—";
+	}
+	return PLAIN_WORD.test(description) ? (
+		description
+	) : (
+		<MaskedText>{description}</MaskedText>
+	);
+}
+
 function EventCard() {
 	const { dataset, period, toLocal } = useDashboard();
 	const rows = useMemo(
@@ -139,7 +179,10 @@ function EventCard() {
 		() => [
 			{ header: "日時", cell: (row) => formatDateTime(row.at, toLocal) },
 			{ header: "出来事", cell: (row) => accountEventLabel(row.type) },
-			{ header: "補足", cell: (row) => row.description ?? "—" },
+			{
+				header: "補足",
+				cell: (row) => <EventNote description={row.description} />,
+			},
 		],
 		[toLocal],
 	);
@@ -289,7 +332,13 @@ function TicketCard() {
 										// biome-ignore lint/suspicious/noArrayIndexKey: やりとりには ID が無く、並びも変わらない
 										<li key={index} className={styles.message}>
 											<p className={styles.meta}>
-												<strong>{ticketAuthorLabel(comment.author)}</strong>・
+												<strong>
+													<KnownOrMasked
+														raw={comment.author}
+														label={ticketAuthorLabel(comment.author)}
+													/>
+												</strong>
+												・
 												{time(comment.at, (at) => formatDateTime(at, toLocal))}
 											</p>
 											<MaskedBody>{comment.text}</MaskedBody>
@@ -366,7 +415,11 @@ function ChatCard() {
 														</MaskedText>
 													</strong>
 													・{CHAT_PHASE_LABELS[message.phase]}・
-													{chatTargetLabel(message.sentTo)}あて・
+													<KnownOrMasked
+														raw={message.sentTo}
+														label={chatTargetLabel(message.sentTo)}
+													/>
+													あて・
 													{time(message.at, (at) =>
 														formatDateTime(at, toLocal),
 													)}
@@ -476,7 +529,8 @@ export function AccountPage() {
 			<ReportCard />
 			<TicketCard />
 			<ChatCard />
-			<IpCard />
+			{/* 期間を変えたら、アドレスを伏せた状態に戻す。押していない行が表示されるのを防ぐ */}
+			<IpCard key={period.kind === "all" ? "all" : period.year} />
 		</div>
 	);
 }

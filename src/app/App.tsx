@@ -210,6 +210,8 @@ function Screens({ result }: { result: ImportResult }) {
 export function App() {
 	// 読み込んだデータはメモリ上だけに置く。再読み込みすると消える
 	const [result, setResult] = useState<ImportResult | null>(null);
+	// 伏せ字モードは、データを破棄しても切らない。次に読み込んだデータが、伏せないまま表示されるのを防ぐ
+	const [maskMode, setMaskMode] = useState(false);
 	const [, navigate] = useLocation();
 
 	if (!result) {
@@ -228,7 +230,11 @@ export function App() {
 	}
 
 	return (
-		<DashboardProvider result={result}>
+		<DashboardProvider
+			result={result}
+			maskMode={maskMode}
+			onMaskModeChange={setMaskMode}
+		>
 			<Frame
 				wide
 				barAction={
