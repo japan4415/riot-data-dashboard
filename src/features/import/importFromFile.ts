@@ -24,3 +24,15 @@ export async function importFromFile(file: File): Promise<ImportResult> {
 	await nextPaint();
 	return importArchive(new Uint8Array(buffer));
 }
+
+/**
+ * 合成したサンプルデータを読み込む。
+ *
+ * 利用者のファイルと同じ経路（zip の展開、変換）を通す。サンプルを作るコードは、
+ * 使うときにだけ読み込む。
+ */
+export async function importSample(): Promise<ImportResult> {
+	const { buildDemoZip } = await import("../../demo/demoExport.ts");
+	await nextPaint();
+	return importArchive(buildDemoZip());
+}

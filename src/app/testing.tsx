@@ -32,6 +32,16 @@ export function openScreen(name: string) {
 	fireEvent.click(within(menu()).getByRole("link", { name }));
 }
 
+/**
+ * メニューから画面を開き、その画面の見出しが出るまで待つ。
+ *
+ * 開いたときにコードを読み込む画面（League of Legends）は、すぐには表示されない。
+ */
+export async function openScreenAndWait(name: string) {
+	openScreen(name);
+	return screen.findByRole("heading", { level: 1, name });
+}
+
 /** 数値の枠から、見出しに対応する値を読む。 */
 export function statValue(label: string): string | null {
 	const term = screen

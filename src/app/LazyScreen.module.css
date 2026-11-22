@@ -1,0 +1,44 @@
+.message {
+	display: grid;
+	gap: var(--space-4);
+	justify-items: start;
+	padding: var(--space-6) 0;
+	color: var(--color-text-secondary);
+	text-wrap: pretty;
+	word-break: auto-phrase;
+}
+
+.retry {
+	min-height: 2.25rem;
+	padding: 0 var(--space-4);
+	border: 1px solid var(--color-separator-strong);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	font-size: var(--text-small-size);
+	cursor: pointer;
+	transition: transform 100ms ease-out;
+}
+
+/* 押した瞬間に反応を返す */
+.retry:active {
+	transform: scale(0.97);
+	background: var(--color-separator);
+}
+
+@media (pointer: coarse) {
+	.retry {
+		min-height: 2.75rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.retry {
+		transition: none;
+	}
+
+	.retry:active {
+		transform: none;
+	}
+}

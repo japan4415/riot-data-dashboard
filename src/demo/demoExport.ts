@@ -1,10 +1,12 @@
 import { strToU8, zipSync } from "fflate";
 
 /**
- * 画面の見た目を確かめるための、数年分の合成データ。
+ * 数年分の合成データ。自分の開示データが手元に無い人が画面を試すためと、
+ * 開発中に見た目を確かめるために使う。
  *
  * 実在のアカウントの値は含まない。乱数の種を固定しているので、毎回同じ内容になる。
  * 夜と週末に活動が寄る、ゲームごとに遊んだ時期が違う、といった偏りを持たせてある。
+ * 開示データと同じ形の zip を作り、利用者のファイルと同じ経路で読み込ませる。
  */
 
 /** 種を固定した乱数（mulberry32）。 */
@@ -217,6 +219,12 @@ function varyWildRiftMatches(matches: Row[], random: () => number) {
 	);
 }
 
+/**
+ * サンプルに出すチャンピオンの数値 ID（アニー、アッシュ、ラックスなど）。
+ * 品目 ID は、チャンピオンが `champions_<ID>`、スキンが `championsskin_<ID × 1000 + 番号>`。
+ */
+const DEMO_CHAMPIONS = [1, 21, 22, 51, 64, 81, 86, 99, 103, 157, 222, 236];
+
 const SKIN_PRICES = [520, 750, 975, 1350, 1820];
 const CHAMPION_PRICES = [450, 1350, 3150, 4800, 6300];
 
@@ -245,6 +253,14 @@ function lolStoreTransactions(random: () => number): Row[] {
 		});
 	};
 
+	const championId = () =>
+		DEMO_CHAMPIONS[Math.floor(random() * DEMO_CHAMPIONS.length)] ?? 1;
+	// 好きなチャンピオンのスキンを多く買う、という偏りを持たせる
+	const skinItem = () => {
+		const champion = random() < 0.35 ? 99 : championId();
+		return `championsskin_${champion * 1000 + 1 + Math.floor(random() * 4)}`;
+	};
+
 	const start = Date.parse("2016-02-01");
 	const end = Date.parse("2026-10-01");
 	for (let month = start; month < end; month += 30 * DAY_MS) {
@@ -265,11 +281,11 @@ function lolStoreTransactions(random: () => number): Row[] {
 				CHAMPION_PRICES[Math.floor(random() * CHAMPION_PRICES.length)] ?? 4800;
 			const roll = random();
 			if (roll < 0.3 && rp >= skinPrice) {
-				add(at, "PURCHASE", `championsskin_${1000 + serial}`, {
+				add(at, "PURCHASE", skinItem(), {
 					rp_delta: -skinPrice,
 				});
 			} else if (roll < 0.55 && be >= championPrice) {
-				add(at, "PURCHASE", `champions_${1 + (serial % 160)}`, {
+				add(at, "PURCHASE", `champions_${championId()}`, {
 					ip_delta: -championPrice,
 				});
 			} else if (roll < 0.8) {
@@ -282,19 +298,15 @@ function lolStoreTransactions(random: () => number): Row[] {
 			}
 		}
 		if (random() < 0.05 && rp >= 975) {
-			const itemId = `championsskin_${2000 + serial}`;
+			const itemId = skinItem();
 			add(at + DAY_MS, "PURCHASED_GIFT", itemId, { rp_delta: -975 });
 			add(at + DAY_MS, "ITEM_TRANSFER_SENT", itemId);
 		}
 		if (random() < 0.03) {
-			add(
-				at + 2 * DAY_MS,
-				"ITEM_TRANSFER_RECEIVED",
-				`championsskin_${3000 + serial}`,
-			);
+			add(at + 2 * DAY_MS, "ITEM_TRANSFER_RECEIVED", skinItem());
 		}
 		if (random() < 0.02) {
-			add(at + 3 * DAY_MS, "REFUND", `championsskin_${1000 + serial}`, {
+			add(at + 3 * DAY_MS, "REFUND", skinItem(), {
 				rp_delta: 975,
 				is_refunded: "1",
 			});

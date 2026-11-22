@@ -45,6 +45,56 @@
 	background: var(--color-accent-soft);
 }
 
+/* サンプルデータは補助的な入口なので、主の操作より控えめに見せる */
+.sample {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-4);
+	color: var(--color-text-secondary);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+}
+
+.sampleButton {
+	min-height: 2rem;
+	padding: 0 var(--space-4);
+	border: 1px solid var(--color-separator-strong);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-text);
+	font: inherit;
+	cursor: pointer;
+	transition: transform 100ms ease-out;
+}
+
+/* 押した瞬間に反応を返す */
+.sampleButton:active:not(:disabled) {
+	transform: scale(0.97);
+	background: var(--color-separator);
+}
+
+.sampleButton:disabled {
+	cursor: default;
+	opacity: 0.6;
+}
+
+@media (pointer: coarse) {
+	.sampleButton {
+		min-height: 2.75rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sampleButton {
+		transition: none;
+	}
+
+	.sampleButton:active:not(:disabled) {
+		transform: none;
+	}
+}
+
 .fileInput {
 	position: absolute;
 	width: 1px;

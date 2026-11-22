@@ -18,6 +18,8 @@
 }
 
 .label {
+	/* 名前が 2 行になるときは、語の途中で折り返さない */
+	word-break: auto-phrase;
 	color: var(--color-text-secondary);
 	font-size: var(--text-small-size);
 	line-height: var(--text-small-leading);

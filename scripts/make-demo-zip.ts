@@ -4,7 +4,7 @@
  *   node scripts/make-demo-zip.ts <出力先のパス>
  */
 import { writeFileSync } from "node:fs";
-import { buildDemoZip } from "../tests/fixtures/demoExport.ts";
+import { buildDemoZip } from "../src/demo/demoExport.ts";
 
 const output = process.argv[2];
 if (!output) {

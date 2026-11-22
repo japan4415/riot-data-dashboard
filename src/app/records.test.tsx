@@ -10,6 +10,7 @@ import {
 	importSynthetic,
 	menu,
 	openScreen,
+	openScreenAndWait,
 	showTable,
 	statNote,
 	statValue,
@@ -646,7 +647,7 @@ describe("伏せ字モード", () => {
 			"VALORANT",
 			"課金",
 		]) {
-			openScreen(name);
+			await openScreenAndWait(name);
 			expectAbsent("Tester#JP1", "player@example.com", "203.0.113", "2001:db8");
 		}
 	});

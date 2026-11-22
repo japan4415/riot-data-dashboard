@@ -8,6 +8,7 @@ import {
 	gifts,
 	giftsInPeriod,
 	purchasesByCategory,
+	skinsByChampion,
 	storeSummary,
 	transactionsInPeriod,
 	transactionsOf,
@@ -246,6 +247,82 @@ describe("purchasesByCategory / storeSummary", () => {
 			spentRp: 1475,
 			spentBe: 4800,
 		});
+	});
+});
+
+describe("skinsByChampion", () => {
+	const skin = (id: number, options: Parameters<typeof transaction>[1] = {}) =>
+		transaction("2024-01-01T00:00:00Z", {
+			rawId: `championsskin_${id}`,
+			category: "skin",
+			...options,
+		});
+
+	it("スキンの ID からチャンピオンを求め、多い順に並べる", () => {
+		expect(
+			skinsByChampion([
+				skin(103001),
+				skin(1001),
+				skin(1002),
+				// 色違いも 1 つと数える
+				skin(1014),
+			]),
+		).toEqual([
+			{ championId: 1, count: 3 },
+			{ championId: 103, count: 1 },
+		]);
+	});
+
+	it("同じ数なら、チャンピオンの ID が小さい順に並べる", () => {
+		expect(
+			skinsByChampion([skin(103001), skin(1001)]).map(
+				(entry) => entry.championId,
+			),
+		).toEqual([1, 103]);
+	});
+
+	it("贈り物として受け取ったスキンも数える", () => {
+		expect(
+			skinsByChampion([
+				skin(1001),
+				skin(1002, { kind: "giftReceived" }),
+				skin(103001, { kind: "giftReceived" }),
+			]),
+		).toEqual([
+			{ championId: 1, count: 2 },
+			{ championId: 103, count: 1 },
+		]);
+	});
+
+	it("通常の見た目（番号 0）と、桁が多すぎる ID は数えない", () => {
+		expect(
+			skinsByChampion([
+				skin(1000),
+				transaction("2024-01-01T00:00:00Z", {
+					rawId: `championsskin_${"9".repeat(30)}`,
+				}),
+			]),
+		).toEqual([]);
+	});
+
+	it("人に贈ったもの、返金済み、スキン以外の品目は数えない", () => {
+		const refunded = { ...skin(1003), refunded: true };
+		expect(
+			skinsByChampion([
+				skin(1001),
+				skin(1002, { kind: "giftSent" }),
+				refunded,
+				transaction("2024-01-01T00:00:00Z", { rawId: "champions_1" }),
+				transaction("2024-01-01T00:00:00Z", { rawId: "championsskin_abc" }),
+				transaction("2024-01-01T00:00:00Z", { rawId: null }),
+				// チャンピオンの ID を求められない、小さすぎる値
+				skin(12),
+			]),
+		).toEqual([{ championId: 1, count: 1 }]);
+	});
+
+	it("購入が無ければ空", () => {
+		expect(skinsByChampion([])).toEqual([]);
 	});
 });
 

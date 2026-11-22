@@ -82,6 +82,15 @@
 	letter-spacing: var(--text-small-tracking);
 }
 
+/* 権利に関する表記。読める大きさを保ち、1 行が長くなりすぎないようにする */
+.legal {
+	display: grid;
+	gap: var(--space-1);
+	max-width: 52em;
+	text-wrap: pretty;
+	word-break: auto-phrase;
+}
+
 .footerLink {
 	display: inline-block;
 	transition: opacity 100ms ease-out;
@@ -96,6 +105,21 @@
 .shell[data-wide] .barInner,
 .shell[data-wide] .footer {
 	max-width: var(--dashboard-width);
+}
+
+/* サンプルデータを表示していることを、内容の上に知らせる */
+.sampleNotice {
+	width: calc(100% - var(--page-gutter) * 2);
+	max-width: calc(var(--dashboard-width) - var(--page-gutter) * 2);
+	margin: var(--space-4) auto 0;
+	padding: var(--space-2) var(--space-4);
+	border-radius: var(--radius-s);
+	background: var(--color-notice-bg);
+	color: var(--color-notice-text);
+	font-size: var(--text-small-size);
+	line-height: var(--text-small-leading);
+	text-wrap: pretty;
+	word-break: auto-phrase;
 }
 
 .dashboard {

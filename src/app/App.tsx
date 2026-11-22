@@ -10,7 +10,6 @@ import { Link, Redirect, Route, Switch, useLocation } from "wouter";
 import type { GameScreen } from "../analysis/games.ts";
 import { AccountPage } from "../features/account/AccountPage.tsx";
 import { ActivityPage } from "../features/activity/ActivityPage.tsx";
-import { LolPage } from "../features/games/LolPage.tsx";
 import { LorPage } from "../features/games/LorPage.tsx";
 import { GAME_PATHS } from "../features/games/paths.ts";
 import { ValorantPage } from "../features/games/ValorantPage.tsx";
@@ -23,9 +22,11 @@ import type { ImportResult } from "../import/importArchive.ts";
 import { gameLabel } from "../labels/games.ts";
 import styles from "./App.module.css";
 import { DashboardProvider, useDashboard } from "./DashboardContext.tsx";
+import { createScreenLoader, LazyScreen } from "./LazyScreen.tsx";
 import { MaskToggle } from "./MaskToggle.tsx";
 import { PeriodSelect } from "./PeriodSelect.tsx";
 
+const APP_NAME = "Riot データダッシュボード";
 const REPOSITORY_URL = "https://github.com/japan4415/riot-data-dashboard";
 
 interface Screen {
@@ -33,9 +34,21 @@ interface Screen {
 	label: string;
 }
 
+/**
+ * League of Legends の画面は、品目名の対応表（約 500 KB）を使う。最初に読み込むコードを
+ * 小さく保つため、この画面のコードは対応表ごと、後から読み込む。
+ */
+const lolPageLoader = createScreenLoader(() =>
+	import("../features/games/LolPage.tsx").then((module) => module.LolPage),
+);
+
+function LolScreen() {
+	return <LazyScreen loader={lolPageLoader} />;
+}
+
 /** ゲームごとの画面。記録があるゲームだけを、メニューと経路に出す。 */
 const GAME_PAGES: Readonly<Record<GameScreen, ComponentType>> = {
-	lol: LolPage,
+	lol: LolScreen,
 	valorant: ValorantPage,
 	lor: LorPage,
 	wildrift: WildRiftPage,
@@ -95,7 +108,7 @@ function Frame({ barAction, wide = false, children }: FrameProps) {
 		<div className={styles.shell} data-wide={wide || undefined}>
 			<header className={styles.bar}>
 				<div className={styles.barInner}>
-					<span className={styles.appName}>Riot データダッシュボード</span>
+					<span className={styles.appName}>{APP_NAME}</span>
 					{barAction}
 				</div>
 			</header>
@@ -103,7 +116,19 @@ function Frame({ barAction, wide = false, children }: FrameProps) {
 			{children}
 
 			<footer className={styles.footer}>
-				<p>このサイトは Riot Games が提供または承認するものではありません。</p>
+				<div className={styles.legal}>
+					<p>
+						このサイトは Riot Games が提供または承認するものではありません。Riot
+						Games と、それに関連する名称は、Riot Games, Inc.
+						の商標または登録商標です。
+					</p>
+					{/* Riot Games の「Legal Jibber Jabber」が、利用の条件として表示を求めている文言 */}
+					<p lang="en">
+						{APP_NAME} was created under Riot Games' "Legal Jibber Jabber"
+						policy using assets owned by Riot Games. Riot Games does not endorse
+						or sponsor this project.
+					</p>
+				</div>
 				<p>
 					<a
 						className={styles.footerLink}
@@ -184,6 +209,14 @@ function Navigation({ onDiscard }: { onDiscard: () => void }) {
 /** 読み込み後の画面。記録があるゲームの経路だけを用意する。 */
 function Screens({ result }: { result: ImportResult }) {
 	const { gameScreens } = useDashboard();
+
+	// LoL の記録があるなら、画面を開く前にコードを読み込んでおく。開いたときに待たせず、
+	// あとで通信が切れても開けるようにする。失敗しても、画面を開いたときに読み込み直す
+	useEffect(() => {
+		if (gameScreens.includes("lol")) {
+			lolPageLoader.load().catch(() => {});
+		}
+	}, [gameScreens]);
 	return (
 		<Switch>
 			<Route path="/" component={OverviewPage} />
@@ -210,6 +243,8 @@ function Screens({ result }: { result: ImportResult }) {
 export function App() {
 	// 読み込んだデータはメモリ上だけに置く。再読み込みすると消える
 	const [result, setResult] = useState<ImportResult | null>(null);
+	// 合成したサンプルデータを表示しているか。実在の記録と取り違えないよう、画面に明記する
+	const [sample, setSample] = useState(false);
 	// 伏せ字モードは、データを破棄しても切らない。次に読み込んだデータが、伏せないまま表示されるのを防ぐ
 	const [maskMode, setMaskMode] = useState(false);
 	const [, navigate] = useLocation();
@@ -219,8 +254,9 @@ export function App() {
 			<Frame>
 				<main className={styles.main}>
 					<ImportPage
-						onImported={(imported) => {
+						onImported={(imported, isSample) => {
 							setResult(imported);
+							setSample(isSample);
 							navigate("/");
 						}}
 					/>
@@ -244,6 +280,11 @@ export function App() {
 					</div>
 				}
 			>
+				{sample && (
+					<p className={styles.sampleNotice} role="note">
+						サンプルデータを表示しています。作りもののデータで、実在のアカウントの記録ではありません。
+					</p>
+				)}
 				<div className={styles.dashboard}>
 					<Navigation
 						onDiscard={() => {

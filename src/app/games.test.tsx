@@ -6,6 +6,7 @@ import {
 	importSynthetic,
 	menu,
 	openScreen,
+	openScreenAndWait,
 	showTable,
 	statNote,
 	statValue,
@@ -99,6 +100,12 @@ describe("概要からの移動", () => {
 		);
 
 		expect(window.location.pathname).toBe("/lol");
+		// この画面は、開いたときにコードを読み込む
+		const heading = await screen.findByRole("heading", {
+			level: 1,
+			name: "League of Legends",
+		});
+		expect(document.activeElement).toBe(heading);
 	});
 
 	it("ログインの記録だけがあるゲームには、案内を出さない", async () => {
@@ -374,7 +381,7 @@ const STORE_PATH = "leagueoflegends/store_transactions_uc.json";
 describe("League of Legends の画面", () => {
 	it("購入した品目と、通貨の出入りを表示する", async () => {
 		await importSynthetic();
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		expect(
 			screen.getByRole("heading", { level: 1, name: "League of Legends" }),
@@ -389,19 +396,20 @@ describe("League of Legends の画面", () => {
 
 	it("残高、区分、取引の図表と一覧を表示する。贈り物が無ければ一覧を出さない", async () => {
 		await importSynthetic();
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		expect(headings(2)).toEqual([
 			"RP の残高",
 			"ブルーエッセンスの残高",
 			"購入した品目の区分",
+			"スキンが多いチャンピオン",
 			"取引の一覧",
 		]);
 	});
 
 	it("残高の推移を、古い順の表で確かめられる", async () => {
 		await importSynthetic();
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		expect(tableRows(showTable("RP の残高"))).toEqual([
 			["2013年3月4日 14:06", "0"],
@@ -412,7 +420,7 @@ describe("League of Legends の画面", () => {
 
 	it("購入した品目を、区分と支払い方で数える", async () => {
 		await importSynthetic();
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		const card = showTable("購入した品目の区分");
 		// 1 件も無い支払い方の列も、表には出す
@@ -435,14 +443,15 @@ describe("League of Legends の画面", () => {
 
 	it("取引を新しい順に並べ、種類で絞り込める", async () => {
 		await importSynthetic();
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		const card = screen.getByRole("region", { name: "取引の一覧" });
 		expect(tableRows(card)[0]).toEqual([
 			"2022年3月4日 14:06",
 			"購入",
 			"スキン",
-			"championsskin_1001",
+			// チャンピオンとスキンは、品目 ID を名前に直す
+			"ゴス アニー",
 			"−975",
 			"—",
 			"25",
@@ -470,13 +479,63 @@ describe("League of Legends の画面", () => {
 				],
 			},
 		});
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		const card = screen.getByRole("region", { name: "取引の一覧" });
 		expect(tableRows(card).map((row) => row[1])).toEqual([
 			"返金",
 			"購入（返金済み）",
 		]);
+	});
+
+	it("スキンを手に入れた数を、チャンピオンの名前で数える", async () => {
+		await importSynthetic({
+			extra: {
+				[STORE_PATH]: [
+					storeRow(1, { item_id: "championsskin_1001", rp_delta: -975 }),
+					storeRow(2, { item_id: "championsskin_1002" }),
+					storeRow(3, { item_id: "championsskin_103001", rp_delta: -975 }),
+					// 対応表に無いチャンピオンは、ID で示す
+					storeRow(4, { item_id: "championsskin_999999001" }),
+					// 贈り物として受け取ったものは数える
+					storeRow(8, {
+						type: "ITEM_TRANSFER_RECEIVED",
+						item_id: "championsskin_103004",
+					}),
+					// 人に贈ったものと、返金済みのものは数えない
+					storeRow(5, {
+						type: "PURCHASED_GIFT",
+						item_id: "championsskin_103002",
+						rp_delta: -975,
+					}),
+					storeRow(6, { item_id: "championsskin_103003", is_refunded: "1" }),
+					// スキン以外の品目は数えない
+					storeRow(7, { item_id: "champions_1" }),
+				],
+			},
+		});
+		await openScreenAndWait("League of Legends");
+
+		expect(tableRows(showTable("スキンが多いチャンピオン"))).toEqual([
+			["アニー", "2"],
+			["アーリ", "2"],
+			["チャンピオン 999999", "1"],
+		]);
+	});
+
+	it("名前が分からない品目は、品目 ID のまま表示し、出どころのバージョンを示す", async () => {
+		await importSynthetic();
+		await openScreenAndWait("League of Legends");
+
+		const rows = tableRows(screen.getByRole("region", { name: "取引の一覧" }));
+		expect(rows.map((row) => row[3])).toEqual([
+			"ゴス アニー",
+			"rp_1000",
+			"アニー",
+		]);
+		expect(document.body.textContent).toMatch(
+			/Riot Games が公開しているゲームデータ（バージョン \d+\.\d+\.\d+\s*）/,
+		);
 	});
 
 	it("行が多い一覧は、ページに分けて表示する", async () => {
@@ -487,7 +546,7 @@ describe("League of Legends の画面", () => {
 				),
 			},
 		});
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		const card = screen.getByRole("region", { name: "取引の一覧" });
 		expect(card.textContent).toContain("1〜50 件目（全 60 件）");
@@ -521,28 +580,14 @@ describe("League of Legends の画面", () => {
 				],
 			},
 		});
-		openScreen("League of Legends");
+		await openScreenAndWait("League of Legends");
 
 		const card = screen.getByRole("region", { name: "贈り物の一覧" });
 		expect(card.textContent).toContain("贈った1 件");
 		expect(card.textContent).toContain("受け取った1 件");
 		expect(tableRows(card)).toEqual([
-			[
-				"2024年1月1日 9:00",
-				"受け取った",
-				"RP",
-				"summoner_icon_1",
-				"+650 RP",
-				"—",
-			],
-			[
-				"2024年1月1日 9:00",
-				"贈った",
-				"スキン",
-				"championsskin_1001",
-				"−975 RP",
-				"—",
-			],
+			["2024年1月1日 9:00", "受け取った", "RP", "—", "+650 RP", "—"],
+			["2024年1月1日 9:00", "贈った", "スキン", "ゴス アニー", "−975 RP", "—"],
 		]);
 		// 贈り物の支払いは、購入した品目に数えない
 		expect(statValue("購入した品目")).toBe("0 件");

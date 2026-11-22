@@ -8,6 +8,7 @@ import {
 	giftsInPeriod,
 	PAID_WITH,
 	purchasesByCategory,
+	skinsByChampion,
 	storeSummary,
 	transactionsInPeriod,
 	transactionsOf,
@@ -34,6 +35,7 @@ import {
 	formatNumber,
 	formatSigned,
 } from "../../labels/format.ts";
+import { LOL_ITEM_DATA_VERSION, lolItemName } from "../../labels/lolItems.ts";
 import {
 	currencyLabel,
 	formatDeltas,
@@ -44,8 +46,18 @@ import {
 	TRANSACTION_KIND_LABELS,
 	TRANSACTION_KINDS,
 } from "../../labels/store.ts";
-import type { Transaction, TransactionKind } from "../../model/types.ts";
+import type {
+	Transaction,
+	TransactionItem,
+	TransactionKind,
+} from "../../model/types.ts";
+import pageStyles from "../Page.module.css";
 import { GamePage } from "./GamePage.tsx";
+
+/** 品目の名前。名前が分かるのはチャンピオンとスキンだけで、それ以外は品目 ID をそのまま返す。 */
+function itemLabel(item: TransactionItem): string {
+	return lolItemName(item.rawId) ?? item.rawId ?? "—";
+}
 
 type BalanceChartPoint = BalancePoint & { x: number; y: number };
 
@@ -219,6 +231,91 @@ function CategoryCard({
 	);
 }
 
+/** 図に出すチャンピオンの数。これより多い分は、表でだけ確かめられる。 */
+const TOP_CHAMPIONS = 10;
+
+const SKIN_SERIES = [
+	{ id: "skins", label: "スキン", color: "var(--chart-series-1)" },
+];
+
+interface ChampionRow {
+	championId: number;
+	name: string;
+	count: number;
+}
+
+const CHAMPION_COLUMNS: Column<ChampionRow>[] = [
+	{ header: "チャンピオン", cell: (row) => row.name },
+	{
+		header: "手に入れたスキン",
+		numeric: true,
+		cell: (row) => formatNumber(row.count),
+	},
+];
+
+function ChampionSkinCard({
+	transactions,
+}: {
+	transactions: readonly Transaction[];
+}) {
+	const { champions, rows } = useMemo(() => {
+		const champions: ChampionRow[] = skinsByChampion(transactions).map(
+			(entry) => ({
+				...entry,
+				// 対応表より新しいチャンピオンは、名前が分からないので ID で示す
+				name:
+					lolItemName(`champions_${entry.championId}`) ??
+					`チャンピオン ${entry.championId}`,
+			}),
+		);
+		const rows: BarListRow[] = champions
+			.slice(0, TOP_CHAMPIONS)
+			.map((champion) => ({
+				key: String(champion.championId),
+				label: champion.name,
+				values: [champion.count],
+				value: (
+					<>
+						<strong>{formatNumber(champion.count)}</strong> 個
+					</>
+				),
+			}));
+		return { champions, rows };
+	}, [transactions]);
+
+	if (champions.length === 0) {
+		return null;
+	}
+	return (
+		<ChartCard
+			title="スキンが多いチャンピオン"
+			description={
+				<>
+					買ったスキンと、贈り物として受け取ったスキンを、チャンピオンごとに数えています。色違い（クロマ）も
+					1 個と数え、人に贈ったものと返金済みのものは除きます。
+					{champions.length > TOP_CHAMPIONS &&
+						`図には上位 ${TOP_CHAMPIONS} 体を出しています。全 ${formatNumber(champions.length)} 体は、表で確かめられます。`}
+				</>
+			}
+			chart={
+				<BarList
+					series={SKIN_SERIES}
+					rows={rows}
+					label="チャンピオンごとの、手に入れたスキンの数"
+				/>
+			}
+			table={
+				<DataTable
+					caption="スキンが多いチャンピオン"
+					columns={CHAMPION_COLUMNS}
+					rows={champions}
+					rowKey={(row) => row.championId}
+				/>
+			}
+		/>
+	);
+}
+
 interface GiftCardProps {
 	/** すべての期間の取引。古い順。 */
 	transactions: readonly Transaction[];
@@ -240,7 +337,10 @@ function GiftCard({ transactions }: GiftCardProps) {
 				cell: (row) =>
 					row.what === "rp" ? "RP" : lolItemCategoryLabel(row.item.category),
 			},
-			{ header: "品目 ID", cell: (row) => row.item.rawId ?? "—" },
+			{
+				header: "品目",
+				cell: (row) => (row.what === "rp" ? "—" : itemLabel(row.item)),
+			},
 			{
 				header: "通貨の増減",
 				numeric: true,
@@ -352,7 +452,7 @@ function TransactionCard({
 				header: "区分",
 				cell: (row) => lolItemCategoryLabel(row.item.category),
 			},
-			{ header: "品目 ID", cell: (row) => row.item.rawId ?? "—" },
+			{ header: "品目", cell: (row) => itemLabel(row.item) },
 			{ header: "RP の増減", numeric: true, cell: delta("RP") },
 			{ header: "BE の増減", numeric: true, cell: delta("BE") },
 			{ header: "RP の残高", numeric: true, cell: balance("RP") },
@@ -363,7 +463,7 @@ function TransactionCard({
 	return (
 		<ListCard
 			title="取引の一覧"
-			description="ストアでの取引を、新しい順に並べています。BE はブルーエッセンスです。品目の名前は開示データに含まれないので、品目 ID をそのまま表示しています。"
+			description="ストアでの取引を、新しい順に並べています。BE はブルーエッセンスです。チャンピオンとスキンは名前で、それ以外の品目は品目 ID のまま表示しています。"
 			controls={
 				kinds.length > 1 ? (
 					<SelectField<KindFilter>
@@ -435,8 +535,15 @@ export function LolPage() {
 			<BalanceCard transactions={all} currency="RP" />
 			<BalanceCard transactions={all} currency="BE" />
 			<CategoryCard transactions={transactions} />
+			<ChampionSkinCard transactions={transactions} />
 			<GiftCard transactions={all} />
 			<TransactionCard transactions={transactions} />
+			<p className={pageStyles.footnote}>
+				チャンピオンとスキンの名前は、Riot Games
+				が公開しているゲームデータ（バージョン {LOL_ITEM_DATA_VERSION}
+				）から引いています。それより新しい品目と、チャンピオンとスキン以外の品目は、品目
+				ID のまま表示します。
+			</p>
 		</GamePage>
 	);
 }
