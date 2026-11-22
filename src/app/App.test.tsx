@@ -57,8 +57,17 @@ describe("App: 読み込み前", () => {
 	it("Riot Games の公式サイトではないことを明記する", () => {
 		render(<App />);
 
-		expect(screen.getByRole("contentinfo").textContent).toContain(
+		const footer = screen.getByRole("contentinfo").textContent ?? "";
+		expect(footer).toContain(
 			"Riot Games が提供または承認するものではありません",
+		);
+		expect(footer).toContain("Riot Games, Inc. の商標または登録商標です");
+		// Riot Games の規約が表示を求めている文言
+		expect(footer).toContain(
+			'was created under Riot Games\' "Legal Jibber Jabber" policy using assets owned by Riot Games',
+		);
+		expect(footer).toContain(
+			"Riot Games does not endorse or sponsor this project.",
 		);
 	});
 
@@ -84,6 +93,70 @@ describe("App: 読み込み前", () => {
 
 		const alert = await screen.findByRole("alert");
 		expect(alert.textContent).toContain("開示データが見つかりませんでした");
+	});
+});
+
+describe("App: サンプルデータ", () => {
+	function trySample() {
+		fireEvent.click(
+			screen.getByRole("button", { name: "サンプルデータで試す" }),
+		);
+	}
+
+	it("サンプルデータで画面を試せる。作りもののデータであることを明記する", async () => {
+		render(<App />);
+
+		trySample();
+
+		await screen.findByRole("heading", { level: 1, name: "概要" });
+		expect(screen.getByRole("note").textContent).toContain(
+			"サンプルデータを表示しています",
+		);
+		expect(screen.getByRole("note").textContent).toContain(
+			"実在のアカウントの記録ではありません",
+		);
+		// すべてのゲームの画面を試せる
+		const links = within(screen.getByRole("navigation", { name: "画面" }))
+			.getAllByRole("link")
+			.map((link) => link.textContent);
+		expect(links).toEqual([
+			"概要",
+			"活動",
+			"League of Legends",
+			"VALORANT",
+			"Legends of Runeterra",
+			"Wild Rift",
+			"課金",
+			"アカウント",
+			"読み込み結果",
+		]);
+		expect(
+			Number(statValue("活動した日数")?.replace(/\D/g, "")),
+		).toBeGreaterThan(1000);
+	});
+
+	it("画面を移っても、サンプルデータであることを示し続ける", async () => {
+		render(<App />);
+		trySample();
+		await screen.findByRole("heading", { level: 1, name: "概要" });
+
+		openScreen("アカウント");
+
+		expect(screen.getByRole("note").textContent).toContain(
+			"サンプルデータを表示しています",
+		);
+	});
+
+	it("自分のファイルを読み込んだときは、サンプルデータの表示を出さない", async () => {
+		render(<App />);
+		trySample();
+		await screen.findByRole("heading", { level: 1, name: "概要" });
+
+		fireEvent.click(screen.getByRole("button", { name: "データを破棄" }));
+		choose(zipFile(buildSyntheticZip()));
+		await screen.findByRole("heading", { level: 1, name: "概要" });
+
+		expect(screen.queryByRole("note")).toBeNull();
 	});
 });
 

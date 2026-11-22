@@ -5,6 +5,22 @@ Riot Games のデータ開示で届いた zip を読み込み、自分のアカ�
 zip の展開と集計はすべてブラウザの中で行います。ファイルの中身はサーバーに送信しません。
 
 このサイトは Riot Games が提供または承認するものではありません。
+Riot Games と、それに関連する名称は、Riot Games, Inc. の商標または登録商標です。
+
+riot-data-dashboard was created under Riot Games' "Legal Jibber Jabber" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project.
+
+## できること
+
+| 画面 | 内容 |
+|---|---|
+| 概要、活動 | 活動した日数、試合数、プレイ時間、活動カレンダー、曜日と時刻のヒートマップ |
+| League of Legends | ストアの取引、RP とブルーエッセンスの残高の推移、スキンが多いチャンピオン、贈り物 |
+| VALORANT、Legends of Runeterra、Wild Rift | 試合数、勝率、種別ごとの勝敗、購入の一覧など |
+| 課金 | 通貨ごとの合計、年ごとの課金額、累計の推移 |
+| アカウント | 登録情報、変更履歴、ペナルティ、問い合わせ、チャットログ、IP アドレスの一覧 |
+
+- 開示データが手元に無くても、「サンプルデータで試す」から画面を試せます。
+- 上部の「伏せ字」を入れると、Riot ID や本文を伏せます。画面をそのまま人に見せられます。
 
 ## ドキュメント
 
@@ -54,8 +70,22 @@ Worker の設定は `cloudflare.config.ts` にあります。
 node scripts/import-report.ts <zip のパス>
 ```
 
-画面の見た目は、数年分の合成データで確かめられます。次のコマンドで zip を作り、画面から読み込みます。
+画面の見た目は、数年分の合成データで確かめられます。画面の「サンプルデータで試す」から読み込めます。
+同じデータを zip として書き出すこともできます。
 
 ```sh
 node scripts/make-demo-zip.ts <出力先のパス>
+```
+
+## League of Legends の品目名について
+
+ストアの取引に入っている品目 ID のうち、チャンピオンとスキンは名前に直して表示します。
+対応表（`src/labels/data/lolItems.json`）は、Riot Games が公開している静的データ（Data Dragon）から作り、リポジトリに同梱しています。
+アプリケーションは、実行時にこのデータを取得しません。
+
+新しいチャンピオンやスキンが加わったら、次のコマンドで対応表を作り直し、結果をコミットします。
+このコマンドは Data Dragon からデータを取得します。
+
+```sh
+node scripts/update-lol-items.ts
 ```

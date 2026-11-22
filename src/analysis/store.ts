@@ -227,6 +227,43 @@ export function purchasesByCategory(
 	);
 }
 
+export interface ChampionSkins {
+	/** チャンピオンの数値 ID。 */
+	championId: number;
+	/** 手に入れたスキンの数。色違い（クロマ）も 1 つと数える。 */
+	count: number;
+}
+
+const SKIN_ITEM_ID = /^championsskin_(\d+)$/;
+
+/**
+ * 手に入れたスキンの数を、チャンピオンごとに数える。多い順に並べる。
+ *
+ * スキンの品目 ID は「チャンピオンの ID × 1000 + スキンの番号」なので、
+ * 1000 で割った商がチャンピオンの ID になる。贈り物として買ったものと、
+ * 返金済みのものは含めない。
+ */
+export function skinsByChampion(
+	transactions: readonly Transaction[],
+): ChampionSkins[] {
+	const counts = new Map<number, number>();
+	for (const transaction of transactions) {
+		if (transaction.kind !== "purchase" || transaction.refunded === true) {
+			continue;
+		}
+		const match = SKIN_ITEM_ID.exec(transaction.item.rawId ?? "");
+		const id = Number(match?.[1]);
+		if (!match || !Number.isSafeInteger(id) || id < 1000) {
+			continue;
+		}
+		const championId = Math.floor(id / 1000);
+		counts.set(championId, (counts.get(championId) ?? 0) + 1);
+	}
+	return [...counts]
+		.map(([championId, count]) => ({ championId, count }))
+		.sort((a, b) => b.count - a.count || a.championId - b.championId);
+}
+
 export interface StoreSummary {
 	/** 取引の行数。 */
 	transactions: number;

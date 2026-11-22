@@ -2,7 +2,7 @@ import { type DragEvent, useEffect, useRef, useState } from "react";
 import { ImportError } from "../../import/archive.ts";
 import type { ImportResult } from "../../import/importArchive.ts";
 import styles from "./ImportPage.module.css";
-import { importFromFile } from "./importFromFile.ts";
+import { importFromFile, importSample } from "./importFromFile.ts";
 
 const DATA_HANDLING = [
 	{
@@ -39,7 +39,8 @@ type Status =
 	| { kind: "error"; message: string };
 
 interface ImportPageProps {
-	onImported: (result: ImportResult) => void;
+	/** 読み込みが終わったときに呼ぶ。`sample` は、合成したサンプルデータかどうか。 */
+	onImported: (result: ImportResult, sample: boolean) => void;
 }
 
 export function ImportPage({ onImported }: ImportPageProps) {
@@ -65,7 +66,19 @@ export function ImportPage({ onImported }: ImportPageProps) {
 		}
 		setStatus({ kind: "reading" });
 		try {
-			onImported(await importFromFile(file));
+			onImported(await importFromFile(file), false);
+		} catch (error) {
+			setStatus({ kind: "error", message: messageOf(error) });
+		}
+	}
+
+	async function readSample() {
+		if (reading) {
+			return;
+		}
+		setStatus({ kind: "reading" });
+		try {
+			onImported(await importSample(), true);
 		} catch (error) {
 			setStatus({ kind: "error", message: messageOf(error) });
 		}
@@ -132,7 +145,7 @@ export function ImportPage({ onImported }: ImportPageProps) {
 					</button>
 					<p className={styles.dropHint}>または、ここにファイルをドロップ</p>
 					<p className={styles.status} role="status">
-						{reading ? "zip を読み込んでいます。" : ""}
+						{reading ? "データを読み込んでいます。" : ""}
 					</p>
 					{status.kind === "error" && (
 						<p className={styles.error} role="alert">
@@ -140,6 +153,18 @@ export function ImportPage({ onImported }: ImportPageProps) {
 						</p>
 					)}
 				</div>
+
+				<p className={styles.sample}>
+					開示データが手元に無いときは、作りもののデータで画面を試せます。
+					<button
+						type="button"
+						className={styles.sampleButton}
+						disabled={reading}
+						onClick={() => void readSample()}
+					>
+						サンプルデータで試す
+					</button>
+				</p>
 			</section>
 
 			<section
