@@ -359,6 +359,14 @@
 	}
 }
 
+/* 色を強制する表示では、地の色が使えない。いまいる画面の印を、システムの強調色で残す */
+@media (forced-colors: active) {
+	.navLink[aria-current="page"]::before {
+		background: Highlight;
+		forced-color-adjust: none;
+	}
+}
+
 @media (prefers-reduced-transparency: reduce) {
 	.bar {
 		background: var(--color-chrome-bg);
