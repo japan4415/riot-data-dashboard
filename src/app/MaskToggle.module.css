@@ -10,10 +10,11 @@
 	background: transparent;
 	color: var(--color-text-secondary);
 	font: inherit;
-	font-size: var(--text-small-size);
-	letter-spacing: var(--text-small-tracking);
+	font-size: var(--text-button-size);
+	letter-spacing: var(--tracking-ui);
 	cursor: pointer;
-	font-weight: var(--weight-strong);
+	font-weight: 600;
+	font-family: var(--font-ui);
 }
 
 .toggle[aria-pressed="true"] {

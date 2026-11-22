@@ -16,7 +16,7 @@
 	align-items: baseline;
 	gap: var(--space-1) var(--space-3);
 	font-size: var(--text-body-size);
-	font-weight: 600;
+	font-weight: var(--weight-strong);
 	line-height: 1.4;
 }
 

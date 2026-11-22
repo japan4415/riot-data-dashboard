@@ -10,7 +10,7 @@
 	align-content: start;
 	gap: var(--space-1);
 	min-width: 0;
-	padding: var(--space-4) var(--space-5);
+	padding: 1.25rem;
 	border-radius: var(--radius-l);
 	background: var(--color-surface);
 	/* 数値の大きさを、枠の幅に合わせて決められるようにする */
@@ -31,20 +31,21 @@
 .value {
 	margin: 0;
 	/* 枠が狭いときは数値を少し小さくして、金額のような長い値が途中で折り返さないようにする */
-	font-size: clamp(1.25rem, 18cqi, 1.75rem);
+	font-size: clamp(1.25rem, 19cqi, 2rem);
 	font-weight: var(--weight-heading);
-	line-height: 1.25;
-	letter-spacing: -0.03em;
+	line-height: 1.2;
+	letter-spacing: var(--tracking);
 	/* 日本語の語の途中では折り返さない。空白の位置で折り返し、それでも収まらないときだけ途中で切る */
 	word-break: keep-all;
 	overflow-wrap: anywhere;
+	font-feature-settings: "palt";
 }
 
 /* 単位は数値より小さくして、数値を主役にする */
 .unit {
 	font-size: 1rem;
 	font-weight: var(--weight-strong);
-	letter-spacing: 0;
+	letter-spacing: var(--tracking);
 	white-space: nowrap;
 }
 
@@ -54,6 +55,8 @@
 	font-size: var(--text-small-size);
 	line-height: var(--text-small-leading);
 	letter-spacing: var(--text-small-tracking);
+	text-wrap: balance;
+	word-break: auto-phrase;
 }
 
 @media (prefers-contrast: more) {

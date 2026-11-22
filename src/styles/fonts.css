@@ -1,0 +1,12 @@
+/*
+ * 同梱する書体。どちらも SIL Open Font License 1.1 で配布されている。
+ *
+ * - Noto Sans JP: 本文と見出し。Riot Games の公式サイトの本文と同じ書体
+ * - Inter: 上部の帯とメニューの欧文。公式サイトの帯と同じ書体
+ *
+ * 書体のファイルは、このアプリケーションと同じオリジンから配信する。外部へは取りに行かない。
+ * 文字の範囲ごとに分かれていて、ブラウザは、画面に出る文字を含むファイルだけを読み込む。
+ * 読み込めるまでの間は、端末の書体で表示する（font-display: swap）。
+ */
+@import "@fontsource-variable/noto-sans-jp/wght.css";
+@import "@fontsource-variable/inter/wght.css";

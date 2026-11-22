@@ -2,53 +2,83 @@
  * 色、文字、余白などの共通の値。
  * 余白と文字の大きさは rem で持ち、利用者の文字サイズ設定に追従させる。
  *
- * 見た目は Riot Games の公式サイト（https://www.riotgames.com/ja）の雰囲気に寄せている。
- * 暗い地、赤の差し色、太く詰めた見出し、角を小さく丸めた枠、丸い主ボタン、という特徴を
- * 取り入れた。Riot Games のロゴ、画像、専用のフォントは使っていない。
+ * 見た目は Riot Games の公式サイト（https://www.riotgames.com/ja）に寄せている。
+ * 文字の大きさ、太さ、字間、色、角の丸み、ボタンの寸法は、公式サイトを計測した値に合わせた。
+ * Riot Games のロゴ、画像、専用の書体（見出しの Riot Sans）は使っていない。
  */
 :root {
 	color-scheme: light dark;
 
-	/* 文字。フォントは同梱せず、端末に入っているものを使う */
+	/*
+	 * 文字。本文は、公式サイトの本文と同じ Noto Sans JP。同梱して、同じオリジンから配信する
+	 * （src/styles/fonts.css）。読み込めるまでの間と、読み込めないときは、端末の書体で表示する。
+	 */
 	--font-sans:
-		"Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-		"Yu Gothic UI", Meiryo, system-ui, sans-serif;
+		"Noto Sans JP Variable", "Noto Sans JP", "Hiragino Sans",
+		"Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+	/* 上部の帯とメニュー。公式サイトの帯と同じく、欧文は Inter にする */
+	--font-ui:
+		"Inter Variable", Inter, "Noto Sans JP Variable", "Noto Sans JP",
+		"Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", Meiryo,
+		system-ui, sans-serif;
 	--font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-	/* 見出しは太く、大きいほど行間と字間を詰める */
-	--weight-heading: 800;
+	/*
+	 * 太さ。見出しは 700。小さなラベルとボタンは、公式サイトが 800 を指定して
+	 * 900 の字形で表示しているので、900 にする。
+	 */
+	--weight-medium: 500;
 	--weight-strong: 700;
-	--text-display-size: clamp(2rem, 1.3rem + 3.2vw, 3.5rem);
-	--text-display-leading: 1.15;
-	--text-display-tracking: -0.03em;
-	--text-title-size: 1.25rem;
-	--text-title-leading: 1.35;
-	--text-title-tracking: -0.02em;
+	--weight-heading: 700;
+	--weight-label: 900;
+	/* 字間は、公式サイトと同じく全体を詰める */
+	--tracking: -0.03em;
+	/* 帯とメニューの字間。公式サイトの帯と同じ */
+	--tracking-ui: 0.08em;
+
+	/* 画面の見出し。広い画面で 48px、狭い画面で 31px */
+	--text-display-size: clamp(1.938rem, 1.3rem + 2.7vw, 3rem);
+	--text-display-leading: 1.35;
+	--text-display-tracking: var(--tracking);
+	/* 枠の見出し */
+	--text-title-size: 1.125rem;
+	--text-title-leading: 1.4;
+	--text-title-tracking: var(--tracking);
+	/* 見出しに添える文 */
+	--text-lead-size: clamp(1rem, 0.9rem + 0.45vw, 1.25rem);
 	--text-body-size: 1rem;
-	--text-body-leading: 1.75;
-	--text-body-tracking: 0;
+	--text-body-leading: 1.5;
+	--text-body-tracking: var(--tracking);
 	--text-small-size: 0.8125rem;
-	--text-small-leading: 1.6;
-	--text-small-tracking: 0.01em;
-	/* 小さな見出しやメニューの区切りに使う、太くて字間の広い文字 */
-	--text-label-size: 0.75rem;
-	--text-label-tracking: 0.08em;
+	--text-small-leading: 1.5;
+	--text-small-tracking: var(--tracking);
+	/* 小さな見出し。太い文字にする */
+	--text-label-size: 0.9375rem;
+	--text-label-tracking: var(--tracking);
+	/* 補助的なボタンと、帯の中の文字 */
+	--text-button-size: 0.8125rem;
 
 	/* 色 */
-	--color-bg: light-dark(#ecebe8, #111111);
+	/*
+	 * 地の色。ダークは公式サイトのニュースの節（#0a0a0a）、ライトはキャリアの節（#ebebeb）と同じ。
+	 * ライトの枠は白のままにする。公式サイトの灰色の枠では、図表の色が読みにくくなるため。
+	 */
+	--color-bg: light-dark(#ebebeb, #0a0a0a);
 	--color-surface: light-dark(#ffffff, #252423);
-	--color-text: light-dark(#141212, #f9f9f9);
-	--color-text-secondary: light-dark(#5f5d59, #a9a7a2);
-	--color-separator: light-dark(rgb(20 18 18 / 0.12), rgb(249 249 249 / 0.14));
+	--color-text: light-dark(#0a0a0a, #f9f9f9);
+	--color-text-secondary: light-dark(#656462, #a9a7a2);
+	--color-separator: light-dark(rgb(10 10 10 / 0.12), rgb(249 249 249 / 0.14));
 	--color-separator-strong: light-dark(
-		rgb(20 18 18 / 0.32),
+		rgb(10 10 10 / 0.32),
 		rgb(249 249 249 / 0.36)
 	);
+	/* ダークの地の左上に重ねる、うっすらとした光の色。公式サイトのニュースの節と同じ。ライトでは出さない */
+	--color-glow: light-dark(transparent, rgb(11 196 226 / 0.2));
 	/* 差し色の赤。塗りつぶした部品と、フォーカスの枠に使う */
 	--color-accent: #d13639;
 	--color-accent-hover: #e04a4d;
 	--color-accent-pressed: #b62d30;
-	--color-on-accent: #ffffff;
+	--color-on-accent: #f9f9f9;
 	--color-accent-soft: light-dark(#f8dfdf, #3b2021);
 	/* 文中のリンク。暗い地では赤が読みにくいので、文字の色に下線を付ける */
 	--color-link: light-dark(#b02629, #f9f9f9);
@@ -59,14 +89,17 @@
 	--color-success-text: light-dark(#1b6b3a, #7ddc9f);
 	--color-tooltip-bg: light-dark(#ffffff, #33322f);
 	/* 補助的なボタンや、切り替えの地 */
-	--color-control-bg: light-dark(rgb(20 18 18 / 0.08), rgb(128 128 128 / 0.22));
+	--color-control-bg: light-dark(
+		rgb(173 172 170 / 0.3),
+		rgb(128 128 128 / 0.2)
+	);
 	--color-control-bg-hover: light-dark(
-		rgb(20 18 18 / 0.14),
+		rgb(173 172 170 / 0.5),
 		rgb(128 128 128 / 0.34)
 	);
 	/* 切り替えで選んでいる側。地と文字の色を反転させて示す */
-	--color-control-selected: light-dark(#141212, #f9f9f9);
-	--color-on-control-selected: light-dark(#ffffff, #141212);
+	--color-control-selected: light-dark(#0a0a0a, #f9f9f9);
+	--color-on-control-selected: light-dark(#f9f9f9, #0a0a0a);
 	/* 上部の帯と下部の表記は、ライトでも暗い地にする */
 	--color-chrome-bg: #111111;
 	--color-chrome-surface: #252423;
@@ -90,7 +123,7 @@
 	--chart-level-4: light-dark(#104281, #a9cbf4);
 	--chart-grid: light-dark(#e6e5e1, #383735);
 	--chart-axis: light-dark(#c4c2bd, #5c5a56);
-	--chart-hover: light-dark(rgb(20 18 18 / 0.05), rgb(249 249 249 / 0.07));
+	--chart-hover: light-dark(rgb(10 10 10 / 0.05), rgb(249 249 249 / 0.07));
 
 	/* 余白 */
 	--space-1: 0.25rem;
@@ -102,17 +135,23 @@
 	--space-7: 3rem;
 	--space-8: 4.5rem;
 
-	/* 形。枠の角は小さく丸め、主ボタンと入力欄は丸くする */
-	--radius-s: 0.375rem;
+	/* 形。公式サイトと同じく、ボタンは 6.5px、枠は 8px、主ボタンは 24px */
+	--radius-s: 0.40625rem;
 	--radius-m: 0.5rem;
 	--radius-l: 0.5rem;
+	--radius-cta: 1.5rem;
 	--radius-pill: 999px;
 
+	/* 動き。色の変化は、公式サイトと同じ長さと緩急にする */
+	--ease-hover: 300ms ease-out;
+
 	/* 配置 */
-	--content-width: 60rem;
+	/* 幅は、左右の余白を含む。公式サイトと同じく、広い画面では左右に 80px を空ける */
+	--content-width: 70rem;
 	/* 読み込み後の画面は、メニューと図表を並べるので広く取る */
-	--dashboard-width: 76rem;
-	--nav-width: 12.5rem;
-	--page-gutter: clamp(1rem, 4vw, 2rem);
-	--bar-height: 3.5rem;
+	--dashboard-width: 90rem;
+	--nav-width: 14.5rem;
+	--page-gutter: clamp(1rem, 5.5vw, 5rem);
+	/* 上部の帯の高さ。公式サイトと同じ 80px。狭い画面では、内容に高さを譲る */
+	--bar-height: 5rem;
 }
