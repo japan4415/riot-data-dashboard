@@ -29,6 +29,8 @@ riot-data-dashboard was created under Riot Games' "Legal Jibber Jabber" policy u
 | [docs/original.md](docs/original.md) | 要求の正本。人間のみが編集する |
 | [docs/data-structure.md](docs/data-structure.md) | データ開示 zip の構造 |
 | [docs/design.md](docs/design.md) | アプリケーションの設計 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 報告や変更を出すときの手引き |
+| [SECURITY.md](SECURITY.md) | 脆弱性の報告の方法 |
 
 ## 開発
 
@@ -96,3 +98,15 @@ node scripts/make-demo-zip.ts <出力先のパス>
 ```sh
 node scripts/update-lol-items.ts
 ```
+
+## コントリビュート
+
+不具合の報告、要望、変更の提案を歓迎します。進め方は [CONTRIBUTING.md](CONTRIBUTING.md) にあります。
+
+- Issue やプルリクエストには、実物の開示データと、そこから写した値を貼らないでください。
+- 脆弱性は、公開の Issue には書かず、[SECURITY.md](SECURITY.md) の方法で報告してください。
+
+## ライセンス
+
+このリポジトリのコードと文書は、[Apache License 2.0](LICENSE) で公開しています。
+Riot Games の名称と、同梱している品目名のデータは、このライセンスの対象ではありません。

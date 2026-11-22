@@ -1,0 +1,62 @@
+name: 不具合の報告
+description: 読み込みや表示がおかしいときに使います
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **実物の開示データと、そこから写した値を貼らないでください。** この Issue は誰でも読めます。
+        セキュリティの問題は、ここには書かず、[非公開の報告](https://github.com/japan4415/riot-data-dashboard/security/advisories/new)を使ってください。
+  - type: textarea
+    id: what
+    attributes:
+      label: 起きたこと
+      description: 画面の名前と、表示された内容を書いてください。画像は、サンプルデータの画面か、「伏せ字」を入れた画面で撮ってください。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待したこと
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 再現の手順
+      placeholder: |
+        1. 「サンプルデータで試す」を押す
+        2. 「課金」を開く
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: sample
+    attributes:
+      label: サンプルデータで再現しますか
+      options:
+        - 再現する
+        - 再現しない（手元の zip でだけ起きる）
+        - 確かめていない
+    validations:
+      required: true
+  - type: textarea
+    id: report
+    attributes:
+      label: 読み込み結果（手元の zip でだけ起きる場合）
+      description: "`node scripts/import-report.ts <zip のパス>` の出力を貼ってください。件数と合計だけを表示します。公開してよい内容かを確かめてから貼ってください。"
+      render: text
+  - type: input
+    id: environment
+    attributes:
+      label: ブラウザと OS
+      placeholder: Chrome の最新版、macOS
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: 確認
+      options:
+        - label: 実物の開示データと、そこから写した値（ID、メールアドレス、IP アドレス、本文など）を含めていません
+          required: true
