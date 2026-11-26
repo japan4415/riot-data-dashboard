@@ -2,7 +2,7 @@
 	"name": "riot-data-dashboard",
 	"private": true,
 	"type": "module",
-	"packageManager": "pnpm@10.34.6",
+	"packageManager": "pnpm@10.34.9",
 	"engines": {
 		"node": ">=22"
 	},
